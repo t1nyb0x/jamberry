@@ -12,10 +12,9 @@ import (
 )
 
 // handleSearch は検索コマンドを処理します
-func (h *Handler) handleSearch(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := i.ApplicationCommandData().Options
+func (h *Handler) handleSearch(s *discordgo.Session, i *discordgo.InteractionCreate, options []*discordgo.ApplicationCommandInteractionDataOption) {
 	if len(options) == 0 {
-		slog.Info("validation failed: empty input", "command", "search")
+		slog.Info("validation failed: empty input", "command", "jam search")
 		h.responder.RespondEphemeral(s, i, "❌ 検索キーワードを入力してください。")
 		return
 	}
@@ -24,7 +23,7 @@ func (h *Handler) handleSearch(s *discordgo.Session, i *discordgo.InteractionCre
 
 	// DeferReply
 	if err := h.responder.DeferReply(s, i); err != nil {
-		slog.Error("failed to defer reply", "command", "search", "error", err)
+		slog.Error("failed to defer reply", "command", "jam search", "error", err)
 		return
 	}
 

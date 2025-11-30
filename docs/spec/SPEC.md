@@ -103,11 +103,11 @@ jamberry 側で入力を正規化してから tracktaste に渡す:
 
 | コマンド     | 正規化方式                                          | tracktaste パラメータ |
 | ------------ | --------------------------------------------------- | --------------------- |
-| `/track`     | URL / URI / ID → **URL に正規化**                   | `url`                 |
-| `/artist`    | URL / URI / ID → **URL に正規化**                   | `url`                 |
-| `/album`     | URL / URI / ID → **URL に正規化**                   | `url`                 |
-| `/recommend` | URL / URI / ID → **URL に正規化**                   | `url`                 |
-| `/search`    | 正規化不要（検索クエリをそのまま `q` パラメータへ） | `q`                   |
+| `/jam track`     | URL / URI / ID → **URL に正規化**                   | `url`                 |
+| `/jam artist`    | URL / URI / ID → **URL に正規化**                   | `url`                 |
+| `/jam album`     | URL / URI / ID → **URL に正規化**                   | `url`                 |
+| `/jam recommend` | URL / URI / ID → **URL に正規化**                   | `url`                 |
+| `/jam search`    | 正規化不要（検索クエリをそのまま `q` パラメータへ） | `q`                   |
 
 #### 入力バリデーション
 
@@ -121,10 +121,10 @@ jamberry 側で入力を正規化してから tracktaste に渡す:
 
 各コマンドは、対応するエンティティ種別のみを受け付ける:
 
-- `/track` では track 用 URL / URI のみを受け付け、artist / album の URL / URI が指定された場合は「Spotify の TrackURL を入力してください」を返す
-- `/artist` では artist 用 URL / URI のみを受け付ける
-- `/album` では album 用 URL / URI のみを受け付ける
-- `/recommend` では track 用 URL / URI のみを受け付ける
+- `/jam track` では track 用 URL / URI のみを受け付け、artist / album の URL / URI が指定された場合は「Spotify の TrackURL を入力してください」を返す
+- `/jam artist` では artist 用 URL / URI のみを受け付ける
+- `/jam album` では album 用 URL / URI のみを受け付ける
+- `/jam recommend` では track 用 URL / URI のみを受け付ける
 
 検証方法:
 
@@ -168,16 +168,16 @@ Spotify のトラック URL から詳細情報を取得します。
 
 | 項目     | 内容                                                  |
 | -------- | ----------------------------------------------------- |
-| コマンド | `/track <url>`                                        |
+| コマンド | `/jam track <url>`                                        |
 | 引数     | `url` - Spotify URL, URI, または ID（必須、位置引数） |
 
 引数の説明（Discord 上で表示）: `Spotify の URL, URI, または ID を入力`
 
 使用例:
 
-- `/track https://open.spotify.com/track/xxx`
-- `/track spotify:track:xxx`
-- `/track 4iV5W9uYEdYUVa79Axb7Rh`
+- `/jam track https://open.spotify.com/track/xxx`
+- `/jam track spotify:track:xxx`
+- `/jam track 4iV5W9uYEdYUVa79Axb7Rh`
 
 #### 応答項目
 
@@ -219,16 +219,16 @@ Spotify のトラック URL を基に、関連するおすすめ楽曲を取得�
 
 | 項目     | 内容                                                  |
 | -------- | ----------------------------------------------------- |
-| コマンド | `/recommend <url>`                                    |
+| コマンド | `/jam recommend <url>`                                    |
 | 引数     | `url` - Spotify URL, URI, または ID（必須、位置引数） |
 
 引数の説明（Discord 上で表示）: `Spotify の URL, URI, または ID を入力`
 
 使用例:
 
-- `/recommend https://open.spotify.com/track/xxx`
-- `/recommend spotify:track:xxx`
-- `/recommend 4iV5W9uYEdYUVa79Axb7Rh`
+- `/jam recommend https://open.spotify.com/track/xxx`
+- `/jam recommend spotify:track:xxx`
+- `/jam recommend 4iV5W9uYEdYUVa79Axb7Rh`
 
 #### 応答項目
 
@@ -307,16 +307,16 @@ Spotify のアーティスト URL から詳細情報を取得します。
 
 | 項目     | 内容                                                  |
 | -------- | ----------------------------------------------------- |
-| コマンド | `/artist <url>`                                       |
+| コマンド | `/jam artist <url>`                                       |
 | 引数     | `url` - Spotify URL, URI, または ID（必須、位置引数） |
 
 引数の説明（Discord 上で表示）: `Spotify の URL, URI, または ID を入力`
 
 使用例:
 
-- `/artist https://open.spotify.com/artist/xxx`
-- `/artist spotify:artist:xxx`
-- `/artist 0OdUWJ0sBjDrqHygGUXeCF`
+- `/jam artist https://open.spotify.com/artist/xxx`
+- `/jam artist spotify:artist:xxx`
+- `/jam artist 0OdUWJ0sBjDrqHygGUXeCF`
 
 #### 応答項目
 
@@ -355,16 +355,16 @@ Spotify のアルバム URL から詳細情報を取得します。
 
 | 項目     | 内容                                                  |
 | -------- | ----------------------------------------------------- |
-| コマンド | `/album <url>`                                        |
+| コマンド | `/jam album <url>`                                        |
 | 引数     | `url` - Spotify URL, URI, または ID（必須、位置引数） |
 
 引数の説明（Discord 上で表示）: `Spotify の URL, URI, または ID を入力`
 
 使用例:
 
-- `/album https://open.spotify.com/album/xxx`
-- `/album spotify:album:xxx`
-- `/album 4aawyAB9vmqN3uQ7FjRGTy`
+- `/jam album https://open.spotify.com/album/xxx`
+- `/jam album spotify:album:xxx`
+- `/jam album 4aawyAB9vmqN3uQ7FjRGTy`
 
 #### 応答項目
 
@@ -420,16 +420,16 @@ Spotify のアルバム URL から詳細情報を取得します。
 
 | 項目     | 内容                                       |
 | -------- | ------------------------------------------ |
-| コマンド | `/search <query>`                          |
+| コマンド | `/jam search <query>`                          |
 | 引数     | `query` - 検索キーワード（必須、位置引数） |
 
-> **注**: 現在 tracktaste API はトラック検索のみ対応しているため、`/search` コマンドはトラック検索専用です。アーティスト検索・アルバム検索は tracktaste の将来対応に合わせて実装予定。
+> **注**: 現在 tracktaste API はトラック検索のみ対応しているため、`/jam search` コマンドはトラック検索専用です。アーティスト検索・アルバム検索は tracktaste の将来対応に合わせて実装予定。
 
 使用例:
 
-- `/search 米津玄師`
-- `/search Lemon 米津玄師`
-- `/search Beatles Yesterday`
+- `/jam search 米津玄師`
+- `/jam search Lemon 米津玄師`
+- `/jam search Beatles Yesterday`
 
 #### 応答項目
 

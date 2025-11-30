@@ -128,11 +128,11 @@ func (u *TrackUseCase) GetTrack(ctx context.Context, input TrackInput) (*TrackOu
 ```
 internal/handler/
 ├── handler.go     # ルーター（コマンド振り分け）
-├── track.go       # /track コマンドハンドラー
-├── artist.go      # /artist コマンドハンドラー
-├── album.go       # /album コマンドハンドラー
-├── recommend.go   # /recommend コマンドハンドラー
-├── search.go      # /search コマンドハンドラー
+├── track.go       # /jam track コマンドハンドラー
+├── artist.go      # /jam artist コマンドハンドラー
+├── album.go       # /jam album コマンドハンドラー
+├── recommend.go   # /jam recommend コマンドハンドラー
+├── search.go      # /jam search コマンドハンドラー
 ├── component.go   # ボタンインタラクションハンドラー
 └── responder.go   # Discord レスポンスヘルパー
 ```
@@ -268,7 +268,7 @@ trackUC := usecase.NewTrackUseCase(ttClient)             // インターフェ�
 
 ## データフロー
 
-### コマンド実行フロー（例: /track）
+### コマンド実行フロー（例: /jam track）
 
 ```
 1. Discord → InteractionCreate イベント
@@ -308,7 +308,7 @@ trackUC := usecase.NewTrackUseCase(ttClient)             // インターフェ�
 ### ページネーションフロー
 
 ```
-1. /recommend or /search コマンド
+1. /jam recommend or /jam search コマンド
        │
 2.     ▼
    結果を cache に保存（key: messageID）
@@ -338,7 +338,7 @@ trackUC := usecase.NewTrackUseCase(ttClient)             // インターフェ�
 
 各パッケージ・ファイルは単一の責務を持つ:
 
-- `handler/track.go` → /track コマンドの処理のみ
+- `handler/track.go` → /jam track コマンドの処理のみ
 - `presenter/embed.go` → Embed 構築のみ
 - `infrastructure/tracktaste/client.go` → API 通信のみ
 

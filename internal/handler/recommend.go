@@ -17,10 +17,9 @@ const (
 )
 
 // handleRecommend はレコメンド取得コマンドを処理します
-func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := i.ApplicationCommandData().Options
+func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.InteractionCreate, options []*discordgo.ApplicationCommandInteractionDataOption) {
 	if len(options) == 0 {
-		slog.Info("validation failed: empty input", "command", "recommend")
+		slog.Info("validation failed: empty input", "command", "jam recommend")
 		h.responder.RespondEphemeral(s, i, "❌ URL を入力してください。")
 		return
 	}
@@ -29,7 +28,7 @@ func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.Interaction
 
 	// DeferReply
 	if err := h.responder.DeferReply(s, i); err != nil {
-		slog.Error("failed to defer reply", "command", "recommend", "error", err)
+		slog.Error("failed to defer reply", "command", "jam recommend", "error", err)
 		return
 	}
 

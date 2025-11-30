@@ -15,42 +15,53 @@ func Commands() []*discordgo.ApplicationCommand {
 
 	return []*discordgo.ApplicationCommand{
 		{
-			Name:        "track",
-			Description: "Spotifyトラックの詳細情報を取得します",
-			Options: []*discordgo.ApplicationCommandOption{
-				urlOption,
-			},
-		},
-		{
-			Name:        "artist",
-			Description: "Spotifyアーティストの詳細情報を取得します",
-			Options: []*discordgo.ApplicationCommandOption{
-				urlOption,
-			},
-		},
-		{
-			Name:        "album",
-			Description: "Spotifyアルバムの詳細情報を取得します",
-			Options: []*discordgo.ApplicationCommandOption{
-				urlOption,
-			},
-		},
-		{
-			Name:        "recommend",
-			Description: "トラックに基づくおすすめ楽曲を取得します",
-			Options: []*discordgo.ApplicationCommandOption{
-				urlOption,
-			},
-		},
-		{
-			Name:        "search",
-			Description: "Spotifyでトラックを検索します",
+			Name:        "jam",
+			Description: "jamberry - Spotify 情報取得 Bot",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "query",
-					Description: "検索キーワードを入力",
-					Required:    true,
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "track",
+					Description: "トラックの詳細情報を取得します",
+					Options: []*discordgo.ApplicationCommandOption{
+						urlOption,
+					},
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "artist",
+					Description: "アーティストの詳細情報を取得します",
+					Options: []*discordgo.ApplicationCommandOption{
+						urlOption,
+					},
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "album",
+					Description: "アルバムの詳細情報を取得します",
+					Options: []*discordgo.ApplicationCommandOption{
+						urlOption,
+					},
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "recommend",
+					Description: "トラックに基づくおすすめ楽曲を取得します",
+					Options: []*discordgo.ApplicationCommandOption{
+						urlOption,
+					},
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Name:        "search",
+					Description: "トラックを検索します",
+					Options: []*discordgo.ApplicationCommandOption{
+						{
+							Type:        discordgo.ApplicationCommandOptionString,
+							Name:        "query",
+							Description: "検索キーワードを入力",
+							Required:    true,
+						},
+					},
 				},
 			},
 		},

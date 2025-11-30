@@ -10,10 +10,9 @@ import (
 )
 
 // handleArtist はアーティスト情報取得コマンドを処理します
-func (h *Handler) handleArtist(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := i.ApplicationCommandData().Options
+func (h *Handler) handleArtist(s *discordgo.Session, i *discordgo.InteractionCreate, options []*discordgo.ApplicationCommandInteractionDataOption) {
 	if len(options) == 0 {
-		slog.Info("validation failed: empty input", "command", "artist")
+		slog.Info("validation failed: empty input", "command", "jam artist")
 		h.responder.RespondEphemeral(s, i, "❌ URL を入力してください。")
 		return
 	}
@@ -22,7 +21,7 @@ func (h *Handler) handleArtist(s *discordgo.Session, i *discordgo.InteractionCre
 
 	// DeferReply
 	if err := h.responder.DeferReply(s, i); err != nil {
-		slog.Error("failed to defer reply", "command", "artist", "error", err)
+		slog.Error("failed to defer reply", "command", "jam artist", "error", err)
 		return
 	}
 
@@ -36,5 +35,5 @@ func (h *Handler) handleArtist(s *discordgo.Session, i *discordgo.InteractionCre
 	// Embed構築・返信
 	emb := presenter.BuildArtistEmbed(output.Artist)
 	h.responder.EditResponseEmbed(s, i, emb)
-	slog.Info("command completed", "command", "artist", "artist_name", output.Artist.Name, "artist_id", output.Artist.ID)
+	slog.Info("command completed", "command", "jam artist", "artist_name", output.Artist.Name, "artist_id", output.Artist.ID)
 }

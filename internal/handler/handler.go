@@ -58,12 +58,25 @@ func (h *Handler) HandleInteraction(s *discordgo.Session, i *discordgo.Interacti
 func (h *Handler) handleCommand(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	userID := getUserID(i)
 
+	// サブコマンド名を取得
+	cmdData := i.ApplicationCommandData()
+	cmdName := cmdData.Name
+
+	var subCmdName string
+	var options []*discordgo.ApplicationCommandInteractionDataOption
+
+	// サブコマンドの場合
+	if cmdName == "jam" && len(cmdData.Options) > 0 {
+		subCmdName = cmdData.Options[0].Name
+		options = cmdData.Options[0].Options
+	}
+
 	// ログ出力
-	cmdName := i.ApplicationCommandData().Name
 	slog.Info("command received",
 		"guild_id", i.GuildID,
 		"channel_id", i.ChannelID,
 		"command", cmdName,
+		"subcommand", subCmdName,
 		"user_id", userID,
 	)
 
@@ -74,18 +87,18 @@ func (h *Handler) handleCommand(s *discordgo.Session, i *discordgo.InteractionCr
 		return
 	}
 
-	// コマンドごとの処理
-	switch cmdName {
+	// サブコマンドごとの処理
+	switch subCmdName {
 	case "track":
-		h.handleTrack(s, i)
+		h.handleTrack(s, i, options)
 	case "artist":
-		h.handleArtist(s, i)
+		h.handleArtist(s, i, options)
 	case "album":
-		h.handleAlbum(s, i)
+		h.handleAlbum(s, i, options)
 	case "recommend":
-		h.handleRecommend(s, i)
+		h.handleRecommend(s, i, options)
 	case "search":
-		h.handleSearch(s, i)
+		h.handleSearch(s, i, options)
 	}
 }
 

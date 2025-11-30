@@ -10,10 +10,9 @@ import (
 )
 
 // handleTrack はトラック情報取得コマンドを処理します
-func (h *Handler) handleTrack(s *discordgo.Session, i *discordgo.InteractionCreate) {
-	options := i.ApplicationCommandData().Options
+func (h *Handler) handleTrack(s *discordgo.Session, i *discordgo.InteractionCreate, options []*discordgo.ApplicationCommandInteractionDataOption) {
 	if len(options) == 0 {
-		slog.Info("validation failed: empty input", "command", "track")
+		slog.Info("validation failed: empty input", "command", "jam track")
 		h.responder.RespondEphemeral(s, i, "❌ URL を入力してください。")
 		return
 	}
@@ -22,7 +21,7 @@ func (h *Handler) handleTrack(s *discordgo.Session, i *discordgo.InteractionCrea
 
 	// DeferReply
 	if err := h.responder.DeferReply(s, i); err != nil {
-		slog.Error("failed to defer reply", "command", "track", "error", err)
+		slog.Error("failed to defer reply", "command", "jam track", "error", err)
 		return
 	}
 
@@ -40,5 +39,5 @@ func (h *Handler) handleTrack(s *discordgo.Session, i *discordgo.InteractionCrea
 	// Embed構築・返信
 	emb := presenter.BuildTrackEmbed(output.Track)
 	h.responder.EditResponseEmbed(s, i, emb)
-	slog.Info("command completed", "command", "track", "track_name", output.Track.Name, "track_id", output.Track.ID)
+	slog.Info("command completed", "command", "jam track", "track_name", output.Track.Name, "track_id", output.Track.ID)
 }

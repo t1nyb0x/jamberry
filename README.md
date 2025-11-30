@@ -6,13 +6,13 @@ Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡
 
 ### スラッシュコマンド
 
-| コマンド                         | 説明                                      |
-| -------------------------------- | ----------------------------------------- |
-| `/track <spotify_url_or_id>`     | 楽曲情報を表示（KKBOX リンク付き）        |
-| `/artist <spotify_url_or_id>`    | アーティスト情報を表示                    |
-| `/album <spotify_url_or_id>`     | アルバム情報を表示                        |
-| `/recommend <spotify_url_or_id>` | 楽曲に基づくレコメンドを表示（5 件）      |
-| `/search <query>`                | 楽曲を検索（10 件、ページネーション対応） |
+| コマンド                             | 説明                                      |
+| ------------------------------------ | ----------------------------------------- |
+| `/jam track <spotify_url_or_id>`     | 楽曲情報を表示（KKBOX リンク付き）        |
+| `/jam artist <spotify_url_or_id>`    | アーティスト情報を表示                    |
+| `/jam album <spotify_url_or_id>`     | アルバム情報を表示                        |
+| `/jam recommend <spotify_url_or_id>` | 楽曲に基づくレコメンドを表示（5 件）      |
+| `/jam search <query>`                | 楽曲を検索（10 件、ページネーション対応） |
 
 ### 対応する Spotify ID 形式
 
@@ -150,11 +150,11 @@ jamberry/
 │   │   └── errors.go                  # エラー定義
 │   ├── handler/                       # ハンドラー層（コマンド処理）
 │   │   ├── handler.go                 # ルーター
-│   │   ├── track.go                   # /track ハンドラー
-│   │   ├── artist.go                  # /artist ハンドラー
-│   │   ├── album.go                   # /album ハンドラー
-│   │   ├── recommend.go               # /recommend ハンドラー
-│   │   ├── search.go                  # /search ハンドラー
+│   │   ├── track.go                   # /jam track ハンドラー
+│   │   ├── artist.go                  # /jam artist ハンドラー
+│   │   ├── album.go                   # /jam album ハンドラー
+│   │   ├── recommend.go               # /jam recommend ハンドラー
+│   │   ├── search.go                  # /jam search ハンドラー
 │   │   ├── component.go               # ボタンハンドラー
 │   │   └── responder.go               # Discord レスポンスヘルパー
 │   ├── presenter/                     # プレゼンター層（Embed 構築）
