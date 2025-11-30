@@ -9,9 +9,12 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/t1nyb0x/jamberry/internal/domain"
 )
 
 // Client はtracktaste APIクライアントです
+// domain.MusicRepository インターフェースを実装します
 type Client struct {
 	baseURL    string
 	httpClient *http.Client
@@ -27,6 +30,9 @@ func NewClient(baseURL string) *Client {
 	}
 }
 
+// インターフェース実装の確認
+var _ domain.MusicRepository = (*Client)(nil)
+
 // APIError はtracktaste APIからのエラーレスポンスを表します
 type APIError struct {
 	Status  int    `json:"status"`
@@ -38,165 +44,80 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("tracktaste API error: %s (code: %s, status: %d)", e.Message, e.Code, e.Status)
 }
 
-// Image は画像情報を表します
-type Image struct {
-	URL    string `json:"url"`
-	Height int    `json:"height"`
-	Width  int    `json:"width"`
-}
-
-// Artist はアーティスト情報を表します
-type Artist struct {
-	URL  string `json:"url"`
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-// Album はアルバム情報を表します
-type Album struct {
-	URL         string   `json:"url"`
-	ID          string   `json:"id"`
-	Images      []Image  `json:"images"`
-	Name        string   `json:"name"`
-	ReleaseDate string   `json:"release_date"`
-	Artists     []Artist `json:"artists"`
-}
-
-// Track はトラック情報を表します
-type Track struct {
-	Album       Album    `json:"album"`
-	Artists     []Artist `json:"artists"`
-	DiscNumber  int      `json:"disc_number"`
-	Popularity  *int     `json:"popularity"`
-	ISRC        *string  `json:"isrc"`
-	URL         string   `json:"url"`
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	TrackNumber int      `json:"track_number"`
-	DurationMs  int      `json:"duration_ms"`
-	Explicit    bool     `json:"explicit"`
-}
-
-// SimilarTrack は類似トラック情報を表します
-type SimilarTrack struct {
-	Album       Album   `json:"album"`
-	ISRC        *string `json:"isrc"`
-	UPC         *string `json:"upc"`
-	URL         string  `json:"url"`
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Popularity  *int    `json:"popularity"`
-	TrackNumber int     `json:"track_number"`
-	DurationMs  int     `json:"duration_ms"`
-	Explicit    bool    `json:"explicit"`
-}
-
-// SearchTrack は検索結果のトラック情報を表します
-type SearchTrack struct {
-	Album       Album    `json:"album"`
-	Artists     []Artist `json:"artists"`
-	DiscNumber  int      `json:"disc_number"`
-	Popularity  *int     `json:"popularity"`
-	ISRC        *string  `json:"isrc"`
-	URL         string   `json:"url"`
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	TrackNumber int      `json:"track_number"`
-	DurationMs  int      `json:"duration_ms"`
-	Explicit    bool     `json:"explicit"`
-}
-
-// ArtistFull はアーティストの詳細情報を表します
-type ArtistFull struct {
-	URL        string   `json:"url"`
-	Followers  string   `json:"followers"`
-	Genres     []string `json:"genres"`
-	ID         string   `json:"id"`
-	Images     []Image  `json:"images"`
-	Name       string   `json:"name"`
-	Popularity *int     `json:"popularity"`
-}
-
-// AlbumTrack はアルバム内のトラック情報を表します
-type AlbumTrack struct {
-	Artists     []Artist `json:"artists"`
-	URL         string   `json:"url"`
-	ID          string   `json:"id"`
-	Name        string   `json:"name"`
-	TrackNumber int      `json:"track_number"`
-}
-
-// AlbumTracks はアルバム内のトラックリストを表します
-type AlbumTracks struct {
-	Items []AlbumTrack `json:"items"`
-}
-
-// AlbumFull はアルバムの詳細情報を表します
-type AlbumFull struct {
-	URL         string      `json:"url"`
-	ID          string      `json:"id"`
-	Images      []Image     `json:"images"`
-	Name        string      `json:"name"`
-	ReleaseDate string      `json:"release_date"`
-	Artists     []Artist    `json:"artists"`
-	Tracks      AlbumTracks `json:"tracks"`
-	Popularity  *int        `json:"popularity"`
-	UPC         string      `json:"upc"`
-	Genres      []string    `json:"genres"`
-}
-
 // Response はtracktaste APIの共通レスポンス形式を表します
 type Response[T any] struct {
 	Status int `json:"status"`
 	Result T   `json:"result"`
 }
 
-// SimilarResponse は類似トラックのレスポンス形式を表します
-type SimilarResponse struct {
-	Items []SimilarTrack `json:"items"`
-}
-
-// SearchResponse は検索結果のレスポンス形式を表します
-type SearchResponse struct {
-	Items []SearchTrack `json:"items"`
-}
-
 // FetchTrack はトラック情報を取得します
-func (c *Client) FetchTrack(ctx context.Context, spotifyURL string) (*Track, error) {
+func (c *Client) FetchTrack(ctx context.Context, spotifyURL string) (*domain.Track, error) {
 	endpoint := fmt.Sprintf("%s/v1/track/fetch?url=%s", c.baseURL, url.QueryEscape(spotifyURL))
-	return doRequest[Track](ctx, c, endpoint)
+
+	resp, err := doRequest[trackResponse](ctx, c, endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.toDomain(), nil
 }
 
 // FetchSimilar は類似トラックを取得します
-func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]SimilarTrack, error) {
+func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]domain.SimilarTrack, error) {
 	endpoint := fmt.Sprintf("%s/v1/track/similar?url=%s", c.baseURL, url.QueryEscape(spotifyURL))
-	resp, err := doRequest[SimilarResponse](ctx, c, endpoint)
+
+	resp, err := doRequest[similarResponse](ctx, c, endpoint)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Items, nil
+
+	tracks := make([]domain.SimilarTrack, len(resp.Items))
+	for i, item := range resp.Items {
+		tracks[i] = item.toDomain()
+	}
+
+	return tracks, nil
 }
 
 // SearchTracks はトラックを検索します
-func (c *Client) SearchTracks(ctx context.Context, query string) ([]SearchTrack, error) {
+func (c *Client) SearchTracks(ctx context.Context, query string) ([]domain.Track, error) {
 	endpoint := fmt.Sprintf("%s/v1/track/search?q=%s", c.baseURL, url.QueryEscape(query))
-	resp, err := doRequest[SearchResponse](ctx, c, endpoint)
+
+	resp, err := doRequest[searchResponse](ctx, c, endpoint)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Items, nil
+
+	tracks := make([]domain.Track, len(resp.Items))
+	for i, item := range resp.Items {
+		tracks[i] = item.toDomain()
+	}
+
+	return tracks, nil
 }
 
 // FetchArtist はアーティスト情報を取得します
-func (c *Client) FetchArtist(ctx context.Context, spotifyURL string) (*ArtistFull, error) {
+func (c *Client) FetchArtist(ctx context.Context, spotifyURL string) (*domain.ArtistDetail, error) {
 	endpoint := fmt.Sprintf("%s/v1/artist/fetch?url=%s", c.baseURL, url.QueryEscape(spotifyURL))
-	return doRequest[ArtistFull](ctx, c, endpoint)
+
+	resp, err := doRequest[artistResponse](ctx, c, endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.toDomain(), nil
 }
 
 // FetchAlbum はアルバム情報を取得します
-func (c *Client) FetchAlbum(ctx context.Context, spotifyURL string) (*AlbumFull, error) {
+func (c *Client) FetchAlbum(ctx context.Context, spotifyURL string) (*domain.AlbumDetail, error) {
 	endpoint := fmt.Sprintf("%s/v1/album/fetch?url=%s", c.baseURL, url.QueryEscape(spotifyURL))
-	return doRequest[AlbumFull](ctx, c, endpoint)
+
+	resp, err := doRequest[albumResponse](ctx, c, endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.toDomain(), nil
 }
 
 // doRequest はAPIリクエストを実行します
@@ -235,7 +156,6 @@ func doRequest[T any](ctx context.Context, c *Client, endpoint string) (*T, erro
 	if resp.StatusCode != http.StatusOK {
 		var apiErr APIError
 		if err := json.Unmarshal(body, &apiErr); err != nil {
-			// JSONパースに失敗した場合はステータスコードに応じたエラーを返す
 			return nil, handleHTTPError(resp.StatusCode)
 		}
 		return nil, handleAPIError(&apiErr)

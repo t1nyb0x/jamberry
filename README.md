@@ -6,13 +6,13 @@ Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡
 
 ### スラッシュコマンド
 
-| コマンド                         | 説明                                      |
-| -------------------------------- | ----------------------------------------- |
-| `/track <spotify_url_or_id>`     | 楽曲情報を表示（KKBOX リンク付き）        |
-| `/artist <spotify_url_or_id>`    | アーティスト情報を表示                    |
-| `/album <spotify_url_or_id>`     | アルバム情報を表示                        |
-| `/recommend <spotify_url_or_id>` | 楽曲に基づくレコメンドを表示（5 件）      |
-| `/search <query>`                | 楽曲を検索（10 件、ページネーション対応） |
+| コマンド                             | 説明                                      |
+| ------------------------------------ | ----------------------------------------- |
+| `/jam track <spotify_url_or_id>`     | 楽曲情報を表示（KKBOX リンク付き）        |
+| `/jam artist <spotify_url_or_id>`    | アーティスト情報を表示                    |
+| `/jam album <spotify_url_or_id>`     | アルバム情報を表示                        |
+| `/jam recommend <spotify_url_or_id>` | 楽曲に基づくレコメンドを表示（5 件）      |
+| `/jam search <query>`                | 楽曲を検索（10 件、ページネーション対応） |
 
 ### 対応する Spotify ID 形式
 
@@ -130,33 +130,61 @@ go run ./cmd/jamberry
 jamberry/
 ├── cmd/
 │   └── jamberry/
-│       └── main.go          # エントリーポイント
+│       └── main.go                    # エントリーポイント
 ├── internal/
-│   ├── cache/
-│   │   └── cache.go         # 2層キャッシュ管理
-│   ├── config/
-│   │   └── config.go        # 設定読み込み
-│   ├── embed/
-│   │   └── builder.go       # Discord Embed 構築
-│   ├── handler/
-│   │   └── handler.go       # コマンド・ボタンハンドラー
-│   ├── logger/
-│   │   └── logger.go        # 構造化ロギング
-│   ├── ratelimit/
-│   │   └── limiter.go       # レート制限
-│   ├── spotify/
-│   │   └── validator.go     # Spotify ID 検証・正規化
-│   └── tracktaste/
-│       └── client.go        # tracktaste API クライアント
+│   ├── bot/                           # Discord Bot 管理
+│   │   ├── bot.go                     # Bot セッション管理
+│   │   └── commands.go                # スラッシュコマンド定義
+│   ├── domain/                        # ドメイン層（エンティティ・インターフェース）
+│   │   ├── track.go                   # Track エンティティ
+│   │   ├── artist.go                  # Artist エンティティ
+│   │   ├── album.go                   # Album エンティティ
+│   │   ├── cache.go                   # キャッシュ関連
+│   │   └── repository.go              # リポジトリインターフェース
+│   ├── usecase/                       # ユースケース層（ビジネスロジック）
+│   │   ├── track.go                   # トラック取得
+│   │   ├── artist.go                  # アーティスト取得
+│   │   ├── album.go                   # アルバム取得
+│   │   ├── recommend.go               # レコメンド取得
+│   │   ├── search.go                  # 検索
+│   │   └── errors.go                  # エラー定義
+│   ├── handler/                       # ハンドラー層（コマンド処理）
+│   │   ├── handler.go                 # ルーター
+│   │   ├── track.go                   # /jam track ハンドラー
+│   │   ├── artist.go                  # /jam artist ハンドラー
+│   │   ├── album.go                   # /jam album ハンドラー
+│   │   ├── recommend.go               # /jam recommend ハンドラー
+│   │   ├── search.go                  # /jam search ハンドラー
+│   │   ├── component.go               # ボタンハンドラー
+│   │   └── responder.go               # Discord レスポンスヘルパー
+│   ├── presenter/                     # プレゼンター層（Embed 構築）
+│   │   ├── embed.go                   # Embed ビルダー
+│   │   ├── pagination.go              # ページネーション
+│   │   └── formatter.go               # フォーマットユーティリティ
+│   ├── infrastructure/                # インフラ層
+│   │   ├── tracktaste/                # tracktaste API クライアント
+│   │   │   ├── client.go
+│   │   │   ├── track.go
+│   │   │   ├── artist.go
+│   │   │   └── album.go
+│   │   └── cache/                     # キャッシュ実装
+│   │       └── cache.go
+│   ├── config/                        # 設定
+│   ├── logger/                        # ロガー
+│   ├── ratelimit/                     # レート制限
+│   └── spotify/                       # Spotify バリデーション
 ├── docs/
 │   └── spec/
-│       ├── SPEC.md          # 技術仕様書
-│       └── USECASE.md       # ユースケース仕様書
+│       ├── SPEC.md                    # 技術仕様書
+│       ├── USECASE.md                 # ユースケース仕様書
+│       └── ARCHITECTURE.md            # アーキテクチャ仕様書
 ├── compose.yml
 ├── Dockerfile
 ├── go.mod
 └── README.md
 ```
+
+詳細なアーキテクチャについては [docs/spec/ARCHITECTURE.md](docs/spec/ARCHITECTURE.md) を参照してください。
 
 ### ビルド
 

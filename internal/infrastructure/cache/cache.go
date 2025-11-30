@@ -9,39 +9,33 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/t1nyb0x/jamberry/internal/domain"
 )
 
 const (
-	// L1 TTL (インメモリキャッシュ)
+	// L1TTL はL1キャッシュ（インメモリ）のTTLです
 	L1TTL = 10 * time.Minute
-	// L2 TTL (Redis)
+	// L2TTL はL2キャッシュ（Redis）のTTLです
 	L2TTL = 30 * 24 * time.Hour // 30日
 )
 
-// CacheData はキャッシュに保存するデータを表します
-type CacheData struct {
-	Command   string      `json:"command"`   // "recommend" or "search"
-	Query     string      `json:"query"`     // 検索クエリ or トラックID
-	Type      string      `json:"type"`      // "track" | "artist" | "album"
-	Items     interface{} `json:"items"`     // 結果データ
-	Total     int         `json:"total"`     // 総件数
-	CreatedAt time.Time   `json:"created_at"`
-	OwnerID   string      `json:"owner_id"` // コマンド実行者のユーザーID
-}
-
 // l1Entry はL1キャッシュのエントリを表します
 type l1Entry struct {
-	data      *CacheData
+	data      *domain.PaginationData
 	expiresAt time.Time
 }
 
 // Manager はキャッシュマネージャーです
+// domain.CacheRepository インターフェースを実装します
 type Manager struct {
 	l1       sync.Map
 	redis    *redis.Client
 	redisOK  bool
 	redisMux sync.RWMutex
 }
+
+// インターフェース実装の確認
+var _ domain.CacheRepository = (*Manager)(nil)
 
 // NewManager は新しいキャッシュマネージャーを作成します
 func NewManager(redisURL string) *Manager {
@@ -73,33 +67,33 @@ func NewManager(redisURL string) *Manager {
 }
 
 // makeKey はキャッシュキーを生成します
-func makeKey(messageID string) string {
-	return fmt.Sprintf("pagination:%s", messageID)
+func makeKey(key string) string {
+	return fmt.Sprintf("pagination:%s", key)
 }
 
 // Set はキャッシュにデータを保存します
-func (m *Manager) Set(ctx context.Context, messageID string, data *CacheData) error {
-	key := makeKey(messageID)
+func (m *Manager) Set(ctx context.Context, key string, data *domain.PaginationData) error {
+	cacheKey := makeKey(key)
 
 	// L1に保存
-	m.l1.Store(key, &l1Entry{
+	m.l1.Store(cacheKey, &l1Entry{
 		data:      data,
 		expiresAt: time.Now().Add(L1TTL),
 	})
-	slog.Debug("cache set to L1", "key", key, "command", data.Command, "total", data.Total)
+	slog.Debug("cache set to L1", "key", cacheKey, "command", data.Command, "total", data.Total)
 
 	// L2に保存
 	if m.isRedisOK() {
 		jsonData, err := json.Marshal(data)
 		if err != nil {
-			slog.Warn("failed to marshal cache data", "key", key, "error", err)
+			slog.Warn("failed to marshal cache data", "key", cacheKey, "error", err)
 			return nil // L1には保存済みなのでエラーは返さない
 		}
 
-		if err := m.redis.Set(ctx, key, jsonData, L2TTL).Err(); err != nil {
-			slog.Warn("failed to set cache in redis", "key", key, "error", err)
+		if err := m.redis.Set(ctx, cacheKey, jsonData, L2TTL).Err(); err != nil {
+			slog.Warn("failed to set cache in redis", "key", cacheKey, "error", err)
 		} else {
-			slog.Debug("cache set to L2", "key", key)
+			slog.Debug("cache set to L2", "key", cacheKey)
 		}
 	}
 
@@ -107,51 +101,51 @@ func (m *Manager) Set(ctx context.Context, messageID string, data *CacheData) er
 }
 
 // Get はキャッシュからデータを取得します
-func (m *Manager) Get(ctx context.Context, messageID string) (*CacheData, error) {
-	key := makeKey(messageID)
+func (m *Manager) Get(ctx context.Context, key string) (*domain.PaginationData, error) {
+	cacheKey := makeKey(key)
 
 	// L1から取得
-	if entry, ok := m.l1.Load(key); ok {
+	if entry, ok := m.l1.Load(cacheKey); ok {
 		l1e := entry.(*l1Entry)
 		if time.Now().Before(l1e.expiresAt) {
-			slog.Debug("cache hit L1", "key", key)
+			slog.Debug("cache hit L1", "key", cacheKey)
 			return l1e.data, nil
 		}
 		// 期限切れの場合は削除
-		m.l1.Delete(key)
-		slog.Debug("cache expired L1", "key", key)
+		m.l1.Delete(cacheKey)
+		slog.Debug("cache expired L1", "key", cacheKey)
 	}
 
 	// L2から取得
 	if m.isRedisOK() {
-		jsonData, err := m.redis.Get(ctx, key).Bytes()
+		jsonData, err := m.redis.Get(ctx, cacheKey).Bytes()
 		if err == nil {
-			var data CacheData
+			var data domain.PaginationData
 			if err := json.Unmarshal(jsonData, &data); err == nil {
 				// L1に書き戻し
-				m.l1.Store(key, &l1Entry{
+				m.l1.Store(cacheKey, &l1Entry{
 					data:      &data,
 					expiresAt: time.Now().Add(L1TTL),
 				})
-				slog.Debug("cache hit L2, restored to L1", "key", key)
+				slog.Debug("cache hit L2, restored to L1", "key", cacheKey)
 				return &data, nil
 			}
 		} else if err != redis.Nil {
-			slog.Warn("failed to get cache from redis", "key", key, "error", err)
+			slog.Warn("failed to get cache from redis", "key", cacheKey, "error", err)
 		}
 	}
 
-	slog.Debug("cache miss", "key", key)
+	slog.Debug("cache miss", "key", cacheKey)
 	return nil, fmt.Errorf("cache not found")
 }
 
 // Delete はキャッシュからデータを削除します
-func (m *Manager) Delete(ctx context.Context, messageID string) {
-	key := makeKey(messageID)
-	m.l1.Delete(key)
+func (m *Manager) Delete(ctx context.Context, key string) {
+	cacheKey := makeKey(key)
+	m.l1.Delete(cacheKey)
 
 	if m.isRedisOK() {
-		if err := m.redis.Del(ctx, key).Err(); err != nil {
+		if err := m.redis.Del(ctx, cacheKey).Err(); err != nil {
 			slog.Warn("failed to delete cache from redis", "error", err)
 		}
 	}
