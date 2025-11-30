@@ -35,11 +35,12 @@ func BuildTrackEmbed(track *domain.Track) *discordgo.MessageEmbed {
 				Value:  track.Album.ReleaseDate,
 				Inline: true,
 			},
+			{
+				Name:   "リンク",
+				Value:  fmt.Sprintf("[🔗 Spotify で開く](%s)", track.URL),
+				Inline: false,
+			},
 		},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: "🔗 Spotify で開く",
-		},
-		URL: track.URL,
 	}
 
 	// 人気度（欠損時は省略）
@@ -72,11 +73,12 @@ func BuildArtistEmbed(artist *domain.ArtistDetail) *discordgo.MessageEmbed {
 				Value:  artist.Followers,
 				Inline: true,
 			},
+			{
+				Name:   "リンク",
+				Value:  fmt.Sprintf("[🔗 Spotify で開く](%s)", artist.URL),
+				Inline: false,
+			},
 		},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: "🔗 Spotify で開く",
-		},
-		URL: artist.URL,
 	}
 
 	// ジャンル（最大3件、欠損時は「なし」）
@@ -132,11 +134,12 @@ func BuildAlbumEmbed(album *domain.AlbumDetail) *discordgo.MessageEmbed {
 				Value:  fmt.Sprintf("%d 曲", len(album.Tracks)),
 				Inline: true,
 			},
+			{
+				Name:   "リンク",
+				Value:  fmt.Sprintf("[🔗 Spotify で開く](%s)", album.URL),
+				Inline: false,
+			},
 		},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: "🔗 Spotify で開く",
-		},
-		URL: album.URL,
 	}
 
 	// 人気度（欠損時は省略）
