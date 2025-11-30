@@ -1,0 +1,52 @@
+services:
+  jamberry:
+    build: .
+    container_name: jamberry
+    restart: unless-stopped
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - TRACKTASTE_API_URL=http://tracktaste:8080
+      - REDIS_URL=redis://redis:6379
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      redis:
+        condition: service_healthy
+      tracktaste:
+        condition: service_healthy
+
+  tracktaste:
+    image: ghcr.io/t1nyb0x/tracktaste:latest
+    container_name: jamberry-tracktaste
+    restart: unless-stopped
+    environment:
+      - HTTP_ADDR=:8080
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - KKBOX_ID=${KKBOX_ID}
+      - KKBOX_SECRET=${KKBOX_SECRET}
+      - REDIS_URL=redis:6379
+      - REDIS_PASSWORD=
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: jamberry-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    command: redis-server --appendonly yes
+
+volumes:
+  redis-data:
