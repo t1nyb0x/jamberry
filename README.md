@@ -119,7 +119,7 @@ docker run -d -p 6379:6379 redis:7-alpine
 # tracktaste の環境変数を設定して起動
 
 # アプリケーションを起動
-go run ./cmd/jamberry
+go run ./cmd/server
 ```
 
 ## 開発
@@ -129,7 +129,7 @@ go run ./cmd/jamberry
 ```
 jamberry/
 ├── cmd/
-│   └── jamberry/
+│   └── server/
 │       └── main.go                    # エントリーポイント
 ├── internal/
 │   ├── bot/                           # Discord Bot 管理
@@ -190,7 +190,7 @@ jamberry/
 ### ビルド
 
 ```bash
-go build -o jamberry ./cmd/jamberry
+go build -o jamberry ./cmd/server
 ```
 
 ### テスト
