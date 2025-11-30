@@ -7,6 +7,19 @@ import (
 	"github.com/t1nyb0x/jamberry/internal/domain"
 )
 
+// extractURLFromMarkdown extracts URL from markdown link format: [text](URL)
+func extractURLFromMarkdown(markdown string) string {
+	start := strings.Index(markdown, "](")
+	if start == -1 {
+		return ""
+	}
+	end := strings.Index(markdown[start:], ")")
+	if end == -1 {
+		return ""
+	}
+	return markdown[start+2 : start+end]
+}
+
 func TestBuildTrackEmbed(t *testing.T) {
 	popularity := 85
 
@@ -134,7 +147,6 @@ func TestBuildTrackEmbed(t *testing.T) {
 			result := &EmbedResult{
 				Title:         embed.Title,
 				Description:   embed.Description,
-				URL:           embed.URL,
 				Color:         embed.Color,
 				HasPopularity: false,
 			}
@@ -144,6 +156,10 @@ func TestBuildTrackEmbed(t *testing.T) {
 			for _, field := range embed.Fields {
 				if field.Name == "人気度" {
 					result.HasPopularity = true
+				}
+				if field.Name == "リンク" {
+					// Extract URL from markdown link: [🔗 Spotify で開く](URL)
+					result.URL = extractURLFromMarkdown(field.Value)
 				}
 			}
 			tt.check(t, result)
@@ -243,7 +259,6 @@ func TestBuildArtistEmbed(t *testing.T) {
 			embed := BuildArtistEmbed(tt.artist)
 			result := &EmbedResult{
 				Title:         embed.Title,
-				URL:           embed.URL,
 				HasPopularity: false,
 				HasGenreNone:  false,
 				GenreCount:    0,
@@ -261,6 +276,9 @@ func TestBuildArtistEmbed(t *testing.T) {
 					} else {
 						result.GenreCount = strings.Count(field.Value, ",") + 1
 					}
+				}
+				if field.Name == "リンク" {
+					result.URL = extractURLFromMarkdown(field.Value)
 				}
 			}
 			tt.check(t, result)
