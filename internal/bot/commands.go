@@ -48,6 +48,26 @@ func Commands() []*discordgo.ApplicationCommand {
 					Description: "トラックに基づくおすすめ楽曲を取得します",
 					Options: []*discordgo.ApplicationCommandOption{
 						urlOption,
+						{
+							Type:        discordgo.ApplicationCommandOptionString,
+							Name:        "mode",
+							Description: "レコメンドモード（similar: 雰囲気重視, related: 関連性重視, balanced: バランス）",
+							Required:    false,
+							Choices: []*discordgo.ApplicationCommandOptionChoice{
+								{
+									Name:  "バランス（デフォルト）",
+									Value: "balanced",
+								},
+								{
+									Name:  "雰囲気重視",
+									Value: "similar",
+								},
+								{
+									Name:  "関連性重視",
+									Value: "related",
+								},
+							},
+						},
 					},
 				},
 				{

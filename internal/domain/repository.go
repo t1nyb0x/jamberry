@@ -7,8 +7,11 @@ type TrackRepository interface {
 	// FetchTrack はトラック情報を取得します
 	FetchTrack(ctx context.Context, spotifyURL string) (*Track, error)
 
-	// FetchSimilar は類似トラックを取得します
+	// FetchSimilar は類似トラックを取得します（従来API互換）
 	FetchSimilar(ctx context.Context, spotifyURL string) ([]SimilarTrack, error)
+
+	// FetchRecommend はレコメンドトラックを取得します（新レコメンドエンジン対応）
+	FetchRecommend(ctx context.Context, spotifyURL string, mode RecommendMode, limit int) (*RecommendResult, error)
 
 	// SearchTracks はトラックを検索します
 	SearchTracks(ctx context.Context, query string) ([]Track, error)

@@ -62,7 +62,7 @@ func (c *Client) FetchTrack(ctx context.Context, spotifyURL string) (*domain.Tra
 	return resp.toDomain(), nil
 }
 
-// FetchSimilar は類似トラックを取得します
+// FetchSimilar は類似トラックを取得します（従来API互換）
 func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]domain.SimilarTrack, error) {
 	endpoint := fmt.Sprintf("%s/v1/track/similar?url=%s", c.baseURL, url.QueryEscape(spotifyURL))
 
@@ -77,6 +77,27 @@ func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]domain.
 	}
 
 	return tracks, nil
+}
+
+// FetchRecommend はレコメンドトラックを取得します（新レコメンドエンジン対応）
+func (c *Client) FetchRecommend(ctx context.Context, spotifyURL string, mode domain.RecommendMode, limit int) (*domain.RecommendResult, error) {
+	// デフォルト値の設定
+	if mode == "" {
+		mode = domain.RecommendModeBalanced
+	}
+	if limit <= 0 || limit > 30 {
+		limit = 20
+	}
+
+	endpoint := fmt.Sprintf("%s/v1/track/recommend?url=%s&mode=%s&limit=%d",
+		c.baseURL, url.QueryEscape(spotifyURL), string(mode), limit)
+
+	resp, err := doRequest[recommendResponse](ctx, c, endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.toDomain(), nil
 }
 
 // SearchTracks はトラックを検索します
