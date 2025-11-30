@@ -74,3 +74,14 @@ func (r *Responder) RespondEphemeralWithEmbed(s *discordgo.Session, i *discordgo
 		},
 	})
 }
+
+// UpdateEphemeralMessage はEphemeralメッセージを更新します
+func (r *Responder) UpdateEphemeralMessage(s *discordgo.Session, i *discordgo.InteractionCreate, emb *discordgo.MessageEmbed, components []discordgo.MessageComponent) {
+	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseUpdateMessage,
+		Data: &discordgo.InteractionResponseData{
+			Embeds:     []*discordgo.MessageEmbed{emb},
+			Components: components,
+		},
+	})
+}
