@@ -81,8 +81,21 @@ func validateURL(input string, expectedType EntityType) ValidationResult {
 		}
 	}
 
-	entityType := EntityType(parts[0])
-	id := parts[1]
+	// intl-xx のようなロケールプレフィックスをスキップ
+	startIdx := 0
+	if strings.HasPrefix(parts[0], "intl-") && len(parts) >= 3 {
+		startIdx = 1
+	}
+
+	if len(parts) < startIdx+2 {
+		return ValidationResult{
+			Valid: false,
+			Error: "❌ Spotify の URL / ID として認識できませんでした。",
+		}
+	}
+
+	entityType := EntityType(parts[startIdx])
+	id := parts[startIdx+1]
 
 	// クエリパラメータを除去
 	if idx := strings.Index(id, "?"); idx != -1 {
