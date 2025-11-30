@@ -14,7 +14,7 @@ func NewResponder() *Responder {
 
 // RespondEphemeral はEphemeralメッセージで応答します
 func (r *Responder) RespondEphemeral(s *discordgo.Session, i *discordgo.InteractionCreate, content string) {
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: content,
@@ -32,14 +32,14 @@ func (r *Responder) DeferReply(s *discordgo.Session, i *discordgo.InteractionCre
 
 // EditResponse はDeferred応答を編集します
 func (r *Responder) EditResponse(s *discordgo.Session, i *discordgo.InteractionCreate, content string) {
-	s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+	_, _ = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Content: &content,
 	})
 }
 
 // EditResponseEmbed はDeferred応答をEmbedで編集します
 func (r *Responder) EditResponseEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, emb *discordgo.MessageEmbed) {
-	s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+	_, _ = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Embeds: &[]*discordgo.MessageEmbed{emb},
 	})
 }
@@ -54,7 +54,7 @@ func (r *Responder) EditResponseWithComponents(s *discordgo.Session, i *discordg
 
 // UpdateMessage はメッセージを更新します
 func (r *Responder) UpdateMessage(s *discordgo.Session, i *discordgo.InteractionCreate, emb *discordgo.MessageEmbed, components []discordgo.MessageComponent) {
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseUpdateMessage,
 		Data: &discordgo.InteractionResponseData{
 			Embeds:     []*discordgo.MessageEmbed{emb},
@@ -65,7 +65,7 @@ func (r *Responder) UpdateMessage(s *discordgo.Session, i *discordgo.Interaction
 
 // RespondEphemeralWithEmbed はEmbedを含むEphemeralメッセージで応答します
 func (r *Responder) RespondEphemeralWithEmbed(s *discordgo.Session, i *discordgo.InteractionCreate, emb *discordgo.MessageEmbed, components []discordgo.MessageComponent) {
-	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+	_ = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds:     []*discordgo.MessageEmbed{emb},
