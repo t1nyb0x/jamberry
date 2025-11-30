@@ -85,7 +85,7 @@ func (h *Handler) handleSearch(s *discordgo.Session, i *discordgo.InteractionCre
 
 	// ボタンのCustomIDを更新
 	updatedComponents := presenter.BuildPaginationButtons(msg.ID, 0, totalPages)
-	s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+	_, _ = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Components: &updatedComponents,
 	})
 

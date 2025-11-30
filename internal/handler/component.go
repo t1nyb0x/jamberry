@@ -108,11 +108,11 @@ func (h *Handler) handleViewOwn(s *discordgo.Session, i *discordgo.InteractionCr
 func buildEmbedFromCache(cacheData *domain.PaginationData, page int) *discordgo.MessageEmbed {
 	if cacheData.Command == "recommend" {
 		var items []domain.SimilarTrack
-		json.Unmarshal(cacheData.Items, &items)
+		_ = json.Unmarshal(cacheData.Items, &items)
 		return presenter.BuildRecommendEmbed(cacheData.Query, items, page, PageSize, cacheData.Total)
 	}
 
 	var items []domain.Track
-	json.Unmarshal(cacheData.Items, &items)
+	_ = json.Unmarshal(cacheData.Items, &items)
 	return presenter.BuildSearchEmbed(cacheData.Query, items, page, PageSize, cacheData.Total)
 }

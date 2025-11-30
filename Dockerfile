@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o jamberry ./cmd/jamberry
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o jamberry ./cmd/server
 
 # Runtime stage
 FROM alpine:3.19

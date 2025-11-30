@@ -1,5 +1,8 @@
 # jamberry 🍇
 
+[![CI](https://github.com/t1nyb0x/jamberry/actions/workflows/ci.yml/badge.svg)](https://github.com/t1nyb0x/jamberry/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/t1nyb0x/jamberry/branch/main/graph/badge.svg)](https://codecov.io/gh/t1nyb0x/jamberry)
+
 Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡単に検索・共有できる Bot です。
 
 ## 機能
@@ -119,7 +122,7 @@ docker run -d -p 6379:6379 redis:7-alpine
 # tracktaste の環境変数を設定して起動
 
 # アプリケーションを起動
-go run ./cmd/jamberry
+go run ./cmd/server
 ```
 
 ## 開発
@@ -129,7 +132,7 @@ go run ./cmd/jamberry
 ```
 jamberry/
 ├── cmd/
-│   └── jamberry/
+│   └── server/
 │       └── main.go                    # エントリーポイント
 ├── internal/
 │   ├── bot/                           # Discord Bot 管理
@@ -190,7 +193,7 @@ jamberry/
 ### ビルド
 
 ```bash
-go build -o jamberry ./cmd/jamberry
+go build -o jamberry ./cmd/server
 ```
 
 ### テスト
