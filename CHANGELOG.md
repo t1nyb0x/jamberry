@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/t1nyb0x/jamberry/compare/v1.0.0...v1.0.1) (2025-11-30)
+
+
+### Bug Fixes
+
+* Spotifyで開くが正常に機能していなかった問題を修正 ([eacb5ec](https://github.com/t1nyb0x/jamberry/commit/eacb5ecf5c078a0adc1a995bba4e50325b9a547b))
+* Spotifyで開くが正常に機能していなかった問題を修正 ([7009ae9](https://github.com/t1nyb0x/jamberry/commit/7009ae97083991fbde21cf3b96da2d8a8f6d97f6))
+* Spotifyで開くが正常に機能していなかった問題を修正 ([be3037a](https://github.com/t1nyb0x/jamberry/commit/be3037afb89866d8fd12b70a3cc43e8386766f11))
+
 ## 1.0.0 (2025-11-30)
 
 
