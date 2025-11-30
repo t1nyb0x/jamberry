@@ -177,7 +177,8 @@ jamberry/
 │   └── spec/
 │       ├── SPEC.md                    # 技術仕様書
 │       ├── USECASE.md                 # ユースケース仕様書
-│       └── ARCHITECTURE.md            # アーキテクチャ仕様書
+│       ├── ARCHITECTURE.md            # アーキテクチャ仕様書
+│       └── TEST_SPEC.md               # テスト仕様書
 ├── compose.yml
 ├── Dockerfile
 ├── go.mod
@@ -195,8 +196,17 @@ go build -o jamberry ./cmd/jamberry
 ### テスト
 
 ```bash
+# 全テスト実行
 go test ./...
+
+# カバレッジ付き実行
+go test ./internal/... -cover
+
+# 詳細なテストログ
+go test ./internal/... -v
 ```
+
+テスト仕様の詳細は [docs/spec/TEST_SPEC.md](docs/spec/TEST_SPEC.md) を参照してください。
 
 ## 依存サービス
 
