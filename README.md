@@ -1,5 +1,8 @@
 # jamberry 🍇
 
+[![CI](https://github.com/t1nyb0x/jamberry/actions/workflows/ci.yml/badge.svg)](https://github.com/t1nyb0x/jamberry/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/t1nyb0x/jamberry/branch/main/graph/badge.svg)](https://codecov.io/gh/t1nyb0x/jamberry)
+
 Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡単に検索・共有できる Bot です。
 
 ## 機能
