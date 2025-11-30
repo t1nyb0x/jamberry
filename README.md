@@ -130,33 +130,61 @@ go run ./cmd/jamberry
 jamberry/
 ├── cmd/
 │   └── jamberry/
-│       └── main.go          # エントリーポイント
+│       └── main.go                    # エントリーポイント
 ├── internal/
-│   ├── cache/
-│   │   └── cache.go         # 2層キャッシュ管理
-│   ├── config/
-│   │   └── config.go        # 設定読み込み
-│   ├── embed/
-│   │   └── builder.go       # Discord Embed 構築
-│   ├── handler/
-│   │   └── handler.go       # コマンド・ボタンハンドラー
-│   ├── logger/
-│   │   └── logger.go        # 構造化ロギング
-│   ├── ratelimit/
-│   │   └── limiter.go       # レート制限
-│   ├── spotify/
-│   │   └── validator.go     # Spotify ID 検証・正規化
-│   └── tracktaste/
-│       └── client.go        # tracktaste API クライアント
+│   ├── bot/                           # Discord Bot 管理
+│   │   ├── bot.go                     # Bot セッション管理
+│   │   └── commands.go                # スラッシュコマンド定義
+│   ├── domain/                        # ドメイン層（エンティティ・インターフェース）
+│   │   ├── track.go                   # Track エンティティ
+│   │   ├── artist.go                  # Artist エンティティ
+│   │   ├── album.go                   # Album エンティティ
+│   │   ├── cache.go                   # キャッシュ関連
+│   │   └── repository.go              # リポジトリインターフェース
+│   ├── usecase/                       # ユースケース層（ビジネスロジック）
+│   │   ├── track.go                   # トラック取得
+│   │   ├── artist.go                  # アーティスト取得
+│   │   ├── album.go                   # アルバム取得
+│   │   ├── recommend.go               # レコメンド取得
+│   │   ├── search.go                  # 検索
+│   │   └── errors.go                  # エラー定義
+│   ├── handler/                       # ハンドラー層（コマンド処理）
+│   │   ├── handler.go                 # ルーター
+│   │   ├── track.go                   # /track ハンドラー
+│   │   ├── artist.go                  # /artist ハンドラー
+│   │   ├── album.go                   # /album ハンドラー
+│   │   ├── recommend.go               # /recommend ハンドラー
+│   │   ├── search.go                  # /search ハンドラー
+│   │   ├── component.go               # ボタンハンドラー
+│   │   └── responder.go               # Discord レスポンスヘルパー
+│   ├── presenter/                     # プレゼンター層（Embed 構築）
+│   │   ├── embed.go                   # Embed ビルダー
+│   │   ├── pagination.go              # ページネーション
+│   │   └── formatter.go               # フォーマットユーティリティ
+│   ├── infrastructure/                # インフラ層
+│   │   ├── tracktaste/                # tracktaste API クライアント
+│   │   │   ├── client.go
+│   │   │   ├── track.go
+│   │   │   ├── artist.go
+│   │   │   └── album.go
+│   │   └── cache/                     # キャッシュ実装
+│   │       └── cache.go
+│   ├── config/                        # 設定
+│   ├── logger/                        # ロガー
+│   ├── ratelimit/                     # レート制限
+│   └── spotify/                       # Spotify バリデーション
 ├── docs/
 │   └── spec/
-│       ├── SPEC.md          # 技術仕様書
-│       └── USECASE.md       # ユースケース仕様書
+│       ├── SPEC.md                    # 技術仕様書
+│       ├── USECASE.md                 # ユースケース仕様書
+│       └── ARCHITECTURE.md            # アーキテクチャ仕様書
 ├── compose.yml
 ├── Dockerfile
 ├── go.mod
 └── README.md
 ```
+
+詳細なアーキテクチャについては [docs/spec/ARCHITECTURE.md](docs/spec/ARCHITECTURE.md) を参照してください。
 
 ### ビルド
 
