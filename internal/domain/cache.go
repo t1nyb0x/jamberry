@@ -13,6 +13,7 @@ type PaginationData struct {
 	Items   json.RawMessage `json:"items"`
 	Total   int             `json:"total"`
 	OwnerID string          `json:"owner_id"`
+	Mode    string          `json:"mode,omitempty"` // レコメンドモード（recommend専用）
 }
 
 // CacheRepository はキャッシュを操作するリポジトリインターフェースです

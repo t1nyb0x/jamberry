@@ -174,7 +174,11 @@ func buildEmbedFromCache(cacheData *domain.PaginationData, page int) *discordgo.
 	if cacheData.Command == "recommend" {
 		var items []domain.SimilarTrack
 		_ = json.Unmarshal(cacheData.Items, &items)
-		return presenter.BuildRecommendEmbed(cacheData.Query, items, page, PageSize, cacheData.Total)
+		mode := domain.RecommendMode(cacheData.Mode)
+		if mode == "" {
+			mode = domain.RecommendModeBalanced
+		}
+		return presenter.BuildRecommendEmbed(cacheData.Query, items, page, PageSize, cacheData.Total, mode)
 	}
 
 	var items []domain.Track

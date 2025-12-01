@@ -8,8 +8,22 @@ import (
 	"github.com/t1nyb0x/jamberry/internal/domain"
 )
 
+// getModeLabel はレコメンドモードの日本語ラベルを返します
+func getModeLabel(mode domain.RecommendMode) string {
+	switch mode {
+	case domain.RecommendModeSimilar:
+		return "雰囲気重視"
+	case domain.RecommendModeRelated:
+		return "関連性重視"
+	case domain.RecommendModeBalanced:
+		return "バランス"
+	default:
+		return "バランス"
+	}
+}
+
 // BuildRecommendEmbed はレコメンド結果のEmbedを構築します
-func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, page, pageSize, total int) *discordgo.MessageEmbed {
+func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, page, pageSize, total int, mode domain.RecommendMode) *discordgo.MessageEmbed {
 	start := page * pageSize
 	end := start + pageSize
 	if end > len(items) {
@@ -17,21 +31,54 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 	}
 	displayItems := items[start:end]
 
-	description := fmt.Sprintf("「%s」に基づくレコメンド (%d-%d / %d 件)", originalTrackName, start+1, end, total)
+	modeLabel := getModeLabel(mode)
+	description := fmt.Sprintf("「%s」に基づくレコメンド\n**モード**: %s (%d-%d / %d 件)", originalTrackName, modeLabel, start+1, end, total)
 
 	var trackListParts []string
 	for i, track := range displayItems {
-		// アーティスト名をalbum.artistsから取得
-		artistNames := make([]string, len(track.Album.Artists))
-		for j, a := range track.Album.Artists {
-			artistNames[j] = a.Name
+		// アーティスト名を取得
+		var artistStr string
+		if len(track.Artists) > 0 {
+			artistNames := make([]string, len(track.Artists))
+			for j, a := range track.Artists {
+				artistNames[j] = a.Name
+			}
+			artistStr = strings.Join(artistNames, ", ")
+		} else if len(track.Album.Artists) > 0 {
+			// フォールバック: albumのartistsを使用
+			artistNames := make([]string, len(track.Album.Artists))
+			for j, a := range track.Album.Artists {
+				artistNames[j] = a.Name
+			}
+			artistStr = strings.Join(artistNames, ", ")
 		}
-		artistStr := strings.Join(artistNames, ", ")
 
-		trackListParts = append(trackListParts, fmt.Sprintf(
-			"**%d. %s** - %s\n📀 %s\n🔗 [Spotify](%s)",
-			start+i+1, track.Name, artistStr, track.Album.Name, track.URL,
-		))
+		// 番号と曲名（太字）
+		trackInfo := fmt.Sprintf("**%d. %s**\n", start+i+1, track.Name)
+
+		// アーティスト名 | 類似度
+		if track.SimilarityScore != nil {
+			trackInfo += fmt.Sprintf("- %s | 類似度: %.0f%%", artistStr, *track.SimilarityScore*100)
+		} else {
+			trackInfo += fmt.Sprintf("- %s", artistStr)
+		}
+
+		// アルバム名（あれば）
+		if track.Album.Name != "" {
+			trackInfo += fmt.Sprintf("\n📀 %s", track.Album.Name)
+		}
+
+		// Spotifyリンク
+		spotifyURL := track.URL
+		if spotifyURL == "" && track.ID != "" {
+			// v2 APIではURLが含まれないので、IDからURLを構築
+			spotifyURL = fmt.Sprintf("https://open.spotify.com/track/%s", track.ID)
+		}
+		if spotifyURL != "" {
+			trackInfo += fmt.Sprintf("\n🔗 [Spotify](%s)", spotifyURL)
+		}
+
+		trackListParts = append(trackListParts, trackInfo)
 	}
 
 	return &discordgo.MessageEmbed{

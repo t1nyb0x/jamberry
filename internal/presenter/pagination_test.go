@@ -77,7 +77,7 @@ func TestBuildRecommendEmbed(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			embed := BuildRecommendEmbed(tt.originalTrackName, tt.items, tt.page, tt.pageSize, tt.total)
+			embed := BuildRecommendEmbed(tt.originalTrackName, tt.items, tt.page, tt.pageSize, tt.total, domain.RecommendModeBalanced)
 
 			if embed.Title != tt.wantTitle {
 				t.Errorf("Title = %s, want %s", embed.Title, tt.wantTitle)
