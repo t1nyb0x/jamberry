@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/t1nyb0x/jamberry/internal/version"
 )
 
 // Bot はDiscord Botを表します
@@ -39,6 +40,14 @@ func (b *Bot) Start() error {
 	}
 
 	slog.Info("connected to discord")
+
+	// ステータスにバージョン情報を表示
+	status := "v" + version.GetVersion()
+	if err := b.session.UpdateGameStatus(0, status); err != nil {
+		slog.Warn("failed to update status", "error", err)
+	} else {
+		slog.Info("updated bot status", "status", status)
+	}
 
 	// スラッシュコマンドの登録
 	for _, cmd := range b.commands {
