@@ -25,7 +25,7 @@ func NewClient(baseURL string) *Client {
 	return &Client{
 		baseURL: baseURL,
 		httpClient: &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: 30 * time.Second, // v2 recommend APIは複数の外部APIを呼び出すため長めに設定
 		},
 	}
 }
@@ -62,7 +62,7 @@ func (c *Client) FetchTrack(ctx context.Context, spotifyURL string) (*domain.Tra
 	return resp.toDomain(), nil
 }
 
-// FetchSimilar は類似トラックを取得します
+// FetchSimilar は類似トラックを取得します（従来API互換）
 func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]domain.SimilarTrack, error) {
 	endpoint := fmt.Sprintf("%s/v1/track/similar?url=%s", c.baseURL, url.QueryEscape(spotifyURL))
 
@@ -77,6 +77,28 @@ func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]domain.
 	}
 
 	return tracks, nil
+}
+
+// FetchRecommend はレコメンドトラックを取得します（v2 API: Deezer + MusicBrainz）
+func (c *Client) FetchRecommend(ctx context.Context, spotifyURL string, mode domain.RecommendMode, limit int) (*domain.RecommendResult, error) {
+	// デフォルト値の設定
+	if mode == "" {
+		mode = domain.RecommendModeBalanced
+	}
+	if limit <= 0 || limit > 50 {
+		limit = 10
+	}
+
+	// v2 API エンドポイントを使用（レスポンス形式はv1と同じ: status + result）
+	endpoint := fmt.Sprintf("%s/v2/track/recommend?url=%s&mode=%s&limit=%d",
+		c.baseURL, url.QueryEscape(spotifyURL), string(mode), limit)
+
+	resp, err := doRequest[recommendResponseV2](ctx, c, endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.toDomain(), nil
 }
 
 // SearchTracks はトラックを検索します
@@ -120,7 +142,7 @@ func (c *Client) FetchAlbum(ctx context.Context, spotifyURL string) (*domain.Alb
 	return resp.toDomain(), nil
 }
 
-// doRequest はAPIリクエストを実行します
+// doRequest はAPIリクエストを実行します（v1 API用）
 func doRequest[T any](ctx context.Context, c *Client, endpoint string) (*T, error) {
 	start := time.Now()
 

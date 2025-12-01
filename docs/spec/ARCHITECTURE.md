@@ -55,7 +55,7 @@ jamberry は**レイヤードアーキテクチャ**（Layered Architecture）�
 
 ```
 internal/domain/
-├── track.go       # Track, SimilarTrack エンティティ
+├── track.go       # Track, SimilarTrack, TrackFeatures, RecommendResult エンティティ
 ├── artist.go      # Artist, ArtistDetail エンティティ
 ├── album.go       # Album, AlbumDetail, AlbumTrack, Image エンティティ
 ├── cache.go       # PaginationData, CacheRepository インターフェース

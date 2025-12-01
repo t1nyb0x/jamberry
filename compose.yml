@@ -24,13 +24,27 @@ services:
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
       - KKBOX_ID=${KKBOX_ID}
       - KKBOX_SECRET=${KKBOX_SECRET}
+      - LASTFM_API_KEY=${LASTFM_API_KEY:-}
+      - YTMUSIC_SIDECAR_URL=http://ytmusic-sidecar:8081
       - REDIS_URL=redis:6379
       - REDIS_PASSWORD=
     depends_on:
       redis:
         condition: service_healthy
+      ytmusic-sidecar:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  ytmusic-sidecar:
+    image: ghcr.io/t1nyb0x/tracktaste-ytmusic-sidecar:latest
+    container_name: jamberry-ytmusic-sidecar
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
       interval: 5s
       timeout: 3s
       retries: 5

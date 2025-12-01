@@ -216,38 +216,66 @@ Spotify のトラック URL から詳細情報を取得します。
 ### 2. レコメンド取得
 
 Spotify のトラック URL を基に、関連するおすすめ楽曲を取得します。
+TrackTaste v2 API を使用し、Deezer（BPM/音圧）+ MusicBrainz（タグ/アーティスト関連）に基づく高精度なレコメンドを提供します。
 
 | 項目     | 内容                                                  |
 | -------- | ----------------------------------------------------- |
-| コマンド | `/jam recommend <url>`                                |
+| コマンド | `/jam recommend <url> [mode]`                         |
 | 引数     | `url` - Spotify URL, URI, または ID（必須、位置引数） |
+|          | `mode` - レコメンドモード（任意、下記参照）           |
 
-引数の説明（Discord 上で表示）: `Spotify の URL, URI, または ID を入力`
+引数の説明（Discord 上で表示）:
+
+- `url`: `Spotify の URL, URI, または ID を入力`
+- `mode`: `レコメンドモードを選択`
+
+#### レコメンドモード
+
+| モード     | 内部値     | 説明                                                   |
+| ---------- | ---------- | ------------------------------------------------------ |
+| バランス   | `balanced` | 雰囲気と関連性の両方を考慮（デフォルト）               |
+| 雰囲気重視 | `similar`  | Deezer 特徴量（BPM/Duration/Gain）を重視した類似曲検索 |
+| 関連性重視 | `related`  | MusicBrainz タグ・アーティスト関連を重視               |
 
 使用例:
 
 - `/jam recommend https://open.spotify.com/track/xxx`
-- `/jam recommend spotify:track:xxx`
-- `/jam recommend 4iV5W9uYEdYUVa79Axb7Rh`
+- `/jam recommend spotify:track:xxx バランス`
+- `/jam recommend 4iV5W9uYEdYUVa79Axb7Rh 雰囲気重視`
 
 #### 応答項目
 
-| フィールド     | 説明                           |
-| -------------- | ------------------------------ |
-| トラック名     | 曲名                           |
-| アーティスト名 | 全アーティスト（カンマ区切り） |
-| アルバム名     | アルバム名                     |
-| Spotify リンク | 各トラックへの直接リンク       |
+| フィールド     | 説明                                         |
+| -------------- | -------------------------------------------- |
+| トラック名     | 曲名                                         |
+| アーティスト名 | 全アーティスト（カンマ区切り）               |
+| アルバム名     | アルバム名（v2 API では省略される場合あり）  |
+| 類似度         | 0-100% のスコア（v2 API で提供）             |
+| マッチ理由     | 類似と判定された理由（BPM 類似、タグ一致等） |
+| Spotify リンク | 各トラックへの直接リンク                     |
 
-> **注**: アーティスト名は `album.artists[]` から取得し、複数いる場合はカンマ区切りで連結して表示する。
+#### マッチ理由の表示
+
+v2 API から返却される `match_reasons` を日本語で表示:
+
+| 理由               | 表示             |
+| ------------------ | ---------------- |
+| `similar_bpm`      | BPM 類似         |
+| `similar_duration` | 長さ類似         |
+| `similar_gain`     | 音圧類似         |
+| `same_tag:xxx`     | タグ:xxx         |
+| `artist_relation`  | アーティスト関連 |
+
+> **注**: アーティスト名は `track.artist` または `album.artists[]` から取得。
 
 #### 表示仕様
 
-- tracktaste からは最大 30 件が返却される（popularity 降順でソート済み）
+- TrackTaste v2 API からは最大 50 件が返却可能（デフォルト 10 件）
 - 初回表示: 5 件
-- ページング: 「◀ 前へ」「次へ ▶」ボタンで 5 件ずつページ送り（最大 6 ページ）
-- tracktaste が返す順序をそのまま使用
+- ページング: 「◀ 前へ」「次へ ▶」ボタンで 5 件ずつページ送り
+- ソート: 類似度スコア降順（TrackTaste 側でソート済み）
 - ページングデータはキャッシュに保存（30 日間有効）
+- キャッシュにはモード情報も保存され、ページング時に同じモードで表示
 - キャッシュ期限切れ時: Ephemeral で「データの有効期限が切れました。再度コマンドを実行してください。」と表示
 
 #### Embed 構成例
@@ -255,27 +283,29 @@ Spotify のトラック URL を基に、関連するおすすめ楽曲を取得�
 ```
 ┌─────────────────────────────────────────────────┐
 │ 🎶 おすすめトラック                              │  ← Title
-│ 「元トラック名」に基づくレコメンド (1-5 / 30 件)  │  ← Description
+│ 「元トラック名」に基づくレコメンド               │  ← Description
+│ モード: バランス (1-5 / 10 件)                   │
 ├─────────────────────────────────────────────────┤
-│ 1. トラック名A - アーティストA                   │
-│    📀 アルバム名A                                │
+│ 1. トラック名A - アーティストA | 類似度: 92%     │
+│    ✨ BPM類似, タグ:anime                        │  ← マッチ理由
 │    🔗 Spotify                                   │
-│ 2. トラック名B - アーティストB                   │
-│    📀 アルバム名B                                │
+│ 2. トラック名B - アーティストB | 類似度: 85%     │
+│    ✨ 音圧類似, アーティスト関連                 │
 │    🔗 Spotify                                   │
-│ 3. トラック名C - アーティストC                   │  ← Description 内にリスト
-│    📀 アルバム名C                                │
+│ 3. トラック名C - アーティストC | 類似度: 78%     │  ← Description 内にリスト
+│    ✨ BPM類似                                   │
 │    🔗 Spotify                                   │
-│ 4. トラック名D - アーティストD                   │
-│    📀 アルバム名D                                │
+│ 4. トラック名D - アーティストD | 類似度: 72%     │
+│    ✨ タグ:jpop                                  │
 │    🔗 Spotify                                   │
-│ 5. トラック名E - アーティストE                   │
-│    📀 アルバム名E                                │
+│ 5. トラック名E - アーティストE | 類似度: 68%     │
 │    🔗 Spotify                                   │
 ├─────────────────────────────────────────────────┤
 │ [◀ 前へ]  [次へ ▶]  [👁 自分も見る]                 │  ← Button Components
 └─────────────────────────────────────────────────┘
 ```
+
+> **注**: 類似度スコアとマッチ理由は TrackTaste v2 API から提供される場合のみ表示。
 
 #### ページングボタンの動作
 
@@ -632,7 +662,9 @@ GET /v1/track/fetch?url={spotify_url}
 
 #### GET /v1/track/similar
 
-類似トラック（レコメンド）を取得
+類似トラックを取得（旧仕様: KKBOX レコメンドベース）
+
+> **注意**: この API は `/v2/track/recommend` に置き換えられました。新規実装では v2 API を使用してください。
 
 ```
 GET /v1/track/similar?url={spotify_url}
@@ -669,7 +701,67 @@ GET /v1/track/similar?url={spotify_url}
 }
 ```
 
-> **注**: 最大 30 件が返却される。ソート順は popularity 降順。
+#### GET /v2/track/recommend
+
+レコメンドトラックを取得（v2: Deezer + MusicBrainz ベース）
+
+```
+GET /v2/track/recommend?url={spotify_url}&mode={mode}&limit={limit}
+```
+
+**パラメータ**:
+
+| パラメータ | 必須 | デフォルト | 説明                                       |
+| ---------- | ---- | ---------- | ------------------------------------------ |
+| url        | ✓    | -          | Spotify トラック URL                       |
+| mode       | -    | `balanced` | レコメンドモード: similar/related/balanced |
+| limit      | -    | `10`       | 返却件数（1〜50）                          |
+
+**レスポンス**:
+
+```json
+{
+  "success": true,
+  "data": {
+    "seed_track": {
+      "id": "spotify:track:xxx",
+      "name": "楽曲名",
+      "artist": {
+        "name": "アーティスト名"
+      },
+      "album": {
+        "name": "アルバム名"
+      }
+    },
+    "seed_features": {
+      "bpm": 175.0,
+      "duration_seconds": 245,
+      "gain": -7.2,
+      "tags": ["anime", "jpop", "female vocalist"]
+    },
+    "items": [
+      {
+        "track": {
+          "id": "spotify:track:yyy",
+          "name": "レコメンド楽曲名",
+          "artist": { "name": "アーティスト名" }
+        },
+        "similarity_score": 0.92,
+        "match_reasons": ["similar_bpm", "same_tag:anime", "artist_relation"],
+        "features": {
+          "bpm": 172.0,
+          "duration_seconds": 238,
+          "gain": -6.8,
+          "tags": ["anime", "jpop"]
+        }
+      }
+    ],
+    "mode": "balanced"
+  }
+}
+```
+
+> **注**: v2 API は Deezer（BPM/Duration/Gain）と MusicBrainz（タグ/アーティスト関連）を使用した高精度なレコメンドを提供します。
 
 #### GET /v1/track/search
 

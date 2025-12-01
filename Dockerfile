@@ -13,8 +13,17 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o jamberry ./cmd/server
+# Build arguments for version info
+ARG VERSION=unknown
+ARG GIT_COMMIT=unknown
+ARG BUILD_DATE=unknown
+
+# Build with version info
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+    -ldflags "-X github.com/t1nyb0x/jamberry/internal/version.Version=${VERSION} \
+              -X github.com/t1nyb0x/jamberry/internal/version.GitCommit=${GIT_COMMIT} \
+              -X github.com/t1nyb0x/jamberry/internal/version.BuildDate=${BUILD_DATE}" \
+    -o jamberry ./cmd/server
 
 # Runtime stage
 FROM alpine:3.19

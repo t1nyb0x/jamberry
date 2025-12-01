@@ -24,7 +24,24 @@ func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.Interaction
 		return
 	}
 
-	input := options[0].StringValue()
+	// オプションの解析
+	var input string
+	var mode domain.RecommendMode
+
+	for _, opt := range options {
+		switch opt.Name {
+		case "url":
+			input = opt.StringValue()
+		case "mode":
+			mode = domain.RecommendMode(opt.StringValue())
+		}
+	}
+
+	if input == "" {
+		slog.Info("validation failed: empty input", "command", "jam recommend")
+		h.responder.RespondEphemeral(s, i, "❌ URL を入力してください。")
+		return
+	}
 
 	// DeferReply
 	if err := h.responder.DeferReply(s, i); err != nil {
@@ -33,15 +50,18 @@ func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.Interaction
 	}
 
 	ctx := context.Background()
-	output, err := h.recommendUseCase.GetRecommend(ctx, usecase.RecommendInput{Input: input})
+	output, err := h.recommendUseCase.GetRecommend(ctx, usecase.RecommendInput{
+		Input: input,
+		Mode:  mode,
+	})
 	if err != nil {
 		h.responder.EditResponse(s, i, err.Error())
 		return
 	}
 
 	userID := getUserID(i)
-	totalPages := (len(output.SimilarTracks) + PageSize - 1) / PageSize
-	emb := presenter.BuildRecommendEmbed(output.SourceTrack.Name, output.SimilarTracks, 0, PageSize, len(output.SimilarTracks))
+	totalPages := (len(output.Items) + PageSize - 1) / PageSize
+	emb := presenter.BuildRecommendEmbed(output.SeedTrack.Name, output.Items, 0, PageSize, len(output.Items), output.Mode)
 
 	// 初期ボタン（placeholderで仮設定）
 	components := []discordgo.MessageComponent{
@@ -75,14 +95,15 @@ func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.Interaction
 	}
 
 	// キャッシュに保存
-	itemsJSON, _ := json.Marshal(output.SimilarTracks)
+	itemsJSON, _ := json.Marshal(output.Items)
 	cacheData := &domain.PaginationData{
 		Command: "recommend",
-		Query:   output.SourceTrack.Name,
+		Query:   output.SeedTrack.Name,
 		Type:    "track",
 		Items:   itemsJSON,
-		Total:   len(output.SimilarTracks),
+		Total:   len(output.Items),
 		OwnerID: userID,
+		Mode:    string(output.Mode),
 	}
 	if err := h.cache.Set(ctx, msg.ID, cacheData); err != nil {
 		slog.Warn("failed to cache data", "error", err)
@@ -94,5 +115,9 @@ func (h *Handler) handleRecommend(s *discordgo.Session, i *discordgo.Interaction
 		Components: &updatedComponents,
 	})
 
-	slog.Info("command completed", "command", "recommend", "track_name", output.SourceTrack.Name, "result_count", len(output.SimilarTracks), "message_id", msg.ID)
+	slog.Info("command completed", "command", "recommend",
+		"track_name", output.SeedTrack.Name,
+		"mode", output.Mode,
+		"result_count", len(output.Items),
+		"message_id", msg.ID)
 }

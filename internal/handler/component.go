@@ -104,12 +104,81 @@ func (h *Handler) handleViewOwn(s *discordgo.Session, i *discordgo.InteractionCr
 	h.responder.RespondEphemeralWithEmbed(s, i, emb, components)
 }
 
+// handleEphemeralPaging はエフェメラルメッセージのページングボタンを処理します
+func (h *Handler) handleEphemeralPaging(s *discordgo.Session, i *discordgo.InteractionCreate, messageID, action string, parts []string) {
+	ctx := context.Background()
+	userID := getUserID(i)
+
+	// キャッシュからデータを取得
+	cacheData, err := h.cache.Get(ctx, messageID)
+	if err != nil {
+		slog.Info("cache expired for ephemeral paging", "message_id", messageID, "user_id", userID)
+		h.responder.RespondEphemeral(s, i, "データの有効期限が切れました。再度コマンドを実行してください。")
+		return
+	}
+
+	// 現在のページを取得
+	currentPage := 0
+	if len(parts) >= 3 {
+		if p, err := strconv.Atoi(parts[2]); err == nil {
+			currentPage = p
+		}
+	}
+
+	// 新しいページを計算
+	newPage := currentPage
+	if action == "ephemeral_prev" && currentPage > 0 {
+		newPage = currentPage - 1
+	} else if action == "ephemeral_next" {
+		newPage = currentPage + 1
+	}
+
+	totalPages := (cacheData.Total + PageSize - 1) / PageSize
+	if newPage >= totalPages {
+		newPage = totalPages - 1
+	}
+	if newPage < 0 {
+		newPage = 0
+	}
+
+	// Embedを構築
+	emb := buildEmbedFromCache(cacheData, newPage)
+
+	// エフェメラル用のボタンを構築
+	components := []discordgo.MessageComponent{
+		discordgo.ActionsRow{
+			Components: []discordgo.MessageComponent{
+				discordgo.Button{
+					Label:    "◀ 前へ",
+					Style:    discordgo.SecondaryButton,
+					CustomID: fmt.Sprintf("ephemeral_prev:%s:%d", messageID, newPage),
+					Disabled: newPage == 0,
+				},
+				discordgo.Button{
+					Label:    "次へ ▶",
+					Style:    discordgo.SecondaryButton,
+					CustomID: fmt.Sprintf("ephemeral_next:%s:%d", messageID, newPage),
+					Disabled: newPage >= totalPages-1,
+				},
+			},
+		},
+	}
+
+	// エフェメラルメッセージを更新
+	h.responder.UpdateEphemeralMessage(s, i, emb, components)
+	slog.Debug("ephemeral page updated", "action", action, "message_id", messageID, "page", newPage, "total_pages", totalPages, "user_id", userID)
+}
+
 // buildEmbedFromCache はキャッシュデータからEmbedを構築します
 func buildEmbedFromCache(cacheData *domain.PaginationData, page int) *discordgo.MessageEmbed {
 	if cacheData.Command == "recommend" {
 		var items []domain.SimilarTrack
 		_ = json.Unmarshal(cacheData.Items, &items)
-		return presenter.BuildRecommendEmbed(cacheData.Query, items, page, PageSize, cacheData.Total)
+		mode := domain.RecommendMode(cacheData.Mode)
+		if mode == "" {
+			mode = domain.RecommendModeBalanced
+		}
+		return presenter.BuildRecommendEmbed(cacheData.Query, items, page, PageSize, cacheData.Total, mode)
 	}
 
 	var items []domain.Track

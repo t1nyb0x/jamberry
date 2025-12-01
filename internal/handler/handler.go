@@ -123,6 +123,8 @@ func (h *Handler) handleComponent(s *discordgo.Session, i *discordgo.Interaction
 		h.handlePaging(s, i, messageID, action, parts, userID)
 	case "view_own":
 		h.handleViewOwn(s, i, messageID)
+	case "ephemeral_prev", "ephemeral_next":
+		h.handleEphemeralPaging(s, i, messageID, action, parts)
 	}
 }
 
