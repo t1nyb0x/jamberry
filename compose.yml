@@ -24,6 +24,7 @@ services:
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
       - KKBOX_ID=${KKBOX_ID}
       - KKBOX_SECRET=${KKBOX_SECRET}
+      - LASTFM_API_KEY=${LASTFM_API_KEY:-}
       - REDIS_URL=redis:6379
       - REDIS_PASSWORD=
     depends_on:
