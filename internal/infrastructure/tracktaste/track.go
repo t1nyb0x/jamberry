@@ -93,10 +93,10 @@ func (f *trackFeaturesResponse) toDomain() *domain.TrackFeatures {
 
 // seedTrackResponseV2 はシードトラック情報を表します（v2）
 type seedTrackResponseV2 struct {
-	ID     string        `json:"id"`
-	Name   string        `json:"name"`
-	Artist *artistBasic  `json:"artist"` // v2では単数形
-	Album  *albumResponse `json:"album"`
+	ID      string         `json:"id"`
+	Name    string         `json:"name"`
+	Artists []artistBasic  `json:"artists"` // 実際のAPIは複数形
+	Album   *albumResponse `json:"album"`
 }
 
 func (s *seedTrackResponseV2) toDomain() domain.Track {
@@ -105,8 +105,8 @@ func (s *seedTrackResponseV2) toDomain() domain.Track {
 		Name: s.Name,
 	}
 
-	if s.Artist != nil {
-		track.Artists = []domain.Artist{s.Artist.toDomain()}
+	for _, artist := range s.Artists {
+		track.Artists = append(track.Artists, artist.toDomain())
 	}
 
 	if s.Album != nil {
@@ -117,30 +117,26 @@ func (s *seedTrackResponseV2) toDomain() domain.Track {
 }
 
 // recommendTrackResponseV2 はレコメンドトラック情報を表します（v2）
+// 実際のAPIレスポンスでは、トラック情報がフラットに返される
 type recommendTrackResponseV2 struct {
-	Track           recommendTrackInfo     `json:"track"`
+	ID              string                 `json:"id"`
+	Name            string                 `json:"name"`
+	Artists         []artistBasic          `json:"artists"`
 	SimilarityScore float64                `json:"similarity_score"`
 	MatchReasons    []string               `json:"match_reasons"`
 	Features        *trackFeaturesResponse `json:"features"`
 }
 
-// recommendTrackInfo はレコメンドトラックの基本情報を表します
-type recommendTrackInfo struct {
-	ID     string       `json:"id"`
-	Name   string       `json:"name"`
-	Artist *artistBasic `json:"artist"`
-}
-
 func (t *recommendTrackResponseV2) toDomain() domain.SimilarTrack {
 	track := domain.SimilarTrack{
-		ID:              t.Track.ID,
-		Name:            t.Track.Name,
+		ID:              t.ID,
+		Name:            t.Name,
 		SimilarityScore: &t.SimilarityScore,
 		MatchReasons:    t.MatchReasons,
 	}
 
-	if t.Track.Artist != nil {
-		track.Artists = []domain.Artist{t.Track.Artist.toDomain()}
+	for _, artist := range t.Artists {
+		track.Artists = append(track.Artists, artist.toDomain())
 	}
 
 	if t.Features != nil {

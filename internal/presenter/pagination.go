@@ -22,45 +22,6 @@ func getModeLabel(mode domain.RecommendMode) string {
 	}
 }
 
-// formatMatchReasons はマッチ理由を日本語にフォーマットします
-func formatMatchReasons(reasons []string) string {
-	if len(reasons) == 0 {
-		return ""
-	}
-
-	// v1とv2の両方のマッチ理由に対応
-	reasonMap := map[string]string{
-		// v1 (Spotify Audio Features)
-		"tempo":        "テンポ",
-		"energy":       "エネルギー",
-		"valence":      "明るさ",
-		"danceability": "ダンス感",
-		"acousticness": "アコースティック",
-		"same_genre":   "同ジャンル",
-		"same_artist":  "同アーティスト",
-		// v2 (Deezer + MusicBrainz)
-		"similar_bpm":      "BPM類似",
-		"similar_duration": "長さ類似",
-		"similar_gain":     "音圧類似",
-		"artist_relation":  "アーティスト関連",
-	}
-
-	var labels []string
-	for _, r := range reasons {
-		if label, ok := reasonMap[r]; ok {
-			labels = append(labels, label)
-		} else if strings.HasPrefix(r, "same_tag:") {
-			// same_tag:anime → "タグ: anime"
-			tag := strings.TrimPrefix(r, "same_tag:")
-			labels = append(labels, fmt.Sprintf("タグ:%s", tag))
-		} else {
-			labels = append(labels, r)
-		}
-	}
-
-	return strings.Join(labels, ", ")
-}
-
 // BuildRecommendEmbed はレコメンド結果のEmbedを構築します
 func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, page, pageSize, total int, mode domain.RecommendMode) *discordgo.MessageEmbed {
 	start := page * pageSize
@@ -92,30 +53,12 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 			artistStr = strings.Join(artistNames, ", ")
 		}
 
-		// 基本情報
-		var trackInfo string
+		// 基本情報（番号、曲名、アーティスト）
+		trackInfo := fmt.Sprintf("**%d. %s**\n- %s", start+i+1, track.Name, artistStr)
+
+		// アルバム名（あれば）
 		if track.Album.Name != "" {
-			trackInfo = fmt.Sprintf(
-				"**%d. %s** - %s\n📀 %s",
-				start+i+1, track.Name, artistStr, track.Album.Name,
-			)
-		} else {
-			// v2 APIではアルバム情報が含まれない場合がある
-			trackInfo = fmt.Sprintf(
-				"**%d. %s** - %s",
-				start+i+1, track.Name, artistStr,
-			)
-		}
-
-		// 類似度スコア（あれば）
-		if track.SimilarityScore != nil {
-			trackInfo += fmt.Sprintf(" | 類似度: %.0f%%", *track.SimilarityScore*100)
-		}
-
-		// マッチ理由（あれば）
-		if len(track.MatchReasons) > 0 {
-			reasons := formatMatchReasons(track.MatchReasons)
-			trackInfo += fmt.Sprintf("\n✨ %s", reasons)
+			trackInfo += fmt.Sprintf("\n📀 %s", track.Album.Name)
 		}
 
 		// Spotifyリンク
