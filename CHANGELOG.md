@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/t1nyb0x/jamberry/compare/v1.1.0...v1.1.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* レコメンドの埋め込みメッセージ出力調整 ([b22b262](https://github.com/t1nyb0x/jamberry/commit/b22b2621a68254274972ddf275138fb565ef0bc1))
+* レコメンドの埋め込みメッセージ出力調整 ([8a8cef2](https://github.com/t1nyb0x/jamberry/commit/8a8cef245864dc095cdde8387ba86b74847f25da))
+
 ## [1.1.0](https://github.com/t1nyb0x/jamberry/compare/v1.0.1...v1.1.0) (2025-12-01)
 
 
