@@ -67,6 +67,7 @@ Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡
 - Discord Bot Token
 - Spotify Developer アカウント（Client ID / Secret）
 - KKBOX Developer アカウント（Client ID / Secret）
+- Last.fm API Key（recommend コマンドに必須）
 
 ### 環境変数
 
@@ -77,15 +78,15 @@ cp .env.example .env
 # .env ファイルを編集して必要な値を設定
 ```
 
-| 変数名                  | 説明                               | 必須               |
-| ----------------------- | ---------------------------------- | ------------------ |
-| `DISCORD_BOT_TOKEN`     | Discord Bot のトークン             | ✅                 |
-| `SPOTIFY_CLIENT_ID`     | Spotify API の Client ID           | ✅                 |
-| `SPOTIFY_CLIENT_SECRET` | Spotify API の Client Secret       | ✅                 |
-| `KKBOX_ID`              | KKBOX API の Client ID             | ✅                 |
-| `KKBOX_SECRET`          | KKBOX API の Client Secret         | ✅                 |
-| `LASTFM_API_KEY`        | Last.fm API Key（タグ取得用）      | 任意               |
-| `LOG_LEVEL`             | ログレベル (debug/info/warn/error) | デフォルト: info   |
+| 変数名                  | 説明                                        | 必須             |
+| ----------------------- | ------------------------------------------- | ---------------- |
+| `DISCORD_BOT_TOKEN`     | Discord Bot のトークン                      | ✅               |
+| `SPOTIFY_CLIENT_ID`     | Spotify API の Client ID                    | ✅               |
+| `SPOTIFY_CLIENT_SECRET` | Spotify API の Client Secret                | ✅               |
+| `KKBOX_ID`              | KKBOX API の Client ID                      | ✅               |
+| `KKBOX_SECRET`          | KKBOX API の Client Secret                  | ✅               |
+| `LASTFM_API_KEY`        | Last.fm API Key（recommend コマンドに必須） | ✅               |
+| `LOG_LEVEL`             | ログレベル (debug/info/warn/error)          | デフォルト: info |
 
 ### Discord Bot の設定
 
