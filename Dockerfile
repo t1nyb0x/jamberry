@@ -10,16 +10,14 @@ RUN apk add --no-cache git ca-certificates
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
+# Copy source code (including .git for version info)
 COPY . .
 
-# Build arguments for version info
-ARG VERSION=unknown
-ARG GIT_COMMIT=unknown
-ARG BUILD_DATE=unknown
-
-# Build with version info
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
+# Build with version info from Git
+RUN VERSION=$(git describe --tags --always 2>/dev/null | sed 's/^v//' || echo "dev") && \
+    GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown") && \
+    BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo \
     -ldflags "-X github.com/t1nyb0x/jamberry/internal/version.Version=${VERSION} \
               -X github.com/t1nyb0x/jamberry/internal/version.GitCommit=${GIT_COMMIT} \
               -X github.com/t1nyb0x/jamberry/internal/version.BuildDate=${BUILD_DATE}" \
