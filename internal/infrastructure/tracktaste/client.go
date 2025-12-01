@@ -44,10 +44,16 @@ func (e *APIError) Error() string {
 	return fmt.Sprintf("tracktaste API error: %s (code: %s, status: %d)", e.Message, e.Code, e.Status)
 }
 
-// Response はtracktaste APIの共通レスポンス形式を表します
+// Response はtracktaste APIの共通レスポンス形式を表します（v1）
 type Response[T any] struct {
 	Status int `json:"status"`
 	Result T   `json:"result"`
+}
+
+// ResponseV2 はtracktaste APIの共通レスポンス形式を表します（v2）
+type ResponseV2[T any] struct {
+	Success bool `json:"success"`
+	Data    T    `json:"data"`
 }
 
 // FetchTrack はトラック情報を取得します
@@ -79,20 +85,21 @@ func (c *Client) FetchSimilar(ctx context.Context, spotifyURL string) ([]domain.
 	return tracks, nil
 }
 
-// FetchRecommend はレコメンドトラックを取得します（新レコメンドエンジン対応）
+// FetchRecommend はレコメンドトラックを取得します（v2 API: Deezer + MusicBrainz）
 func (c *Client) FetchRecommend(ctx context.Context, spotifyURL string, mode domain.RecommendMode, limit int) (*domain.RecommendResult, error) {
 	// デフォルト値の設定
 	if mode == "" {
 		mode = domain.RecommendModeBalanced
 	}
-	if limit <= 0 || limit > 30 {
-		limit = 20
+	if limit <= 0 || limit > 50 {
+		limit = 10
 	}
 
-	endpoint := fmt.Sprintf("%s/v1/track/recommend?url=%s&mode=%s&limit=%d",
+	// v2 API エンドポイントを使用
+	endpoint := fmt.Sprintf("%s/v2/track/recommend?url=%s&mode=%s&limit=%d",
 		c.baseURL, url.QueryEscape(spotifyURL), string(mode), limit)
 
-	resp, err := doRequest[recommendResponse](ctx, c, endpoint)
+	resp, err := doRequestV2[recommendResponseV2](ctx, c, endpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +148,7 @@ func (c *Client) FetchAlbum(ctx context.Context, spotifyURL string) (*domain.Alb
 	return resp.toDomain(), nil
 }
 
-// doRequest はAPIリクエストを実行します
+// doRequest はAPIリクエストを実行します（v1 API用）
 func doRequest[T any](ctx context.Context, c *Client, endpoint string) (*T, error) {
 	start := time.Now()
 
@@ -188,6 +195,55 @@ func doRequest[T any](ctx context.Context, c *Client, endpoint string) (*T, erro
 	}
 
 	return &result.Result, nil
+}
+
+// doRequestV2 はAPIリクエストを実行します（v2 API用）
+func doRequestV2[T any](ctx context.Context, c *Client, endpoint string) (*T, error) {
+	start := time.Now()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		slog.Warn("tracktaste API request failed",
+			"endpoint", endpoint,
+			"error", err,
+			"latency_ms", time.Since(start).Milliseconds(),
+		)
+		return nil, fmt.Errorf("❌ 接続エラーが発生しました。")
+	}
+	defer resp.Body.Close()
+
+	slog.Debug("tracktaste API request",
+		"endpoint", endpoint,
+		"status", resp.StatusCode,
+		"latency_ms", time.Since(start).Milliseconds(),
+	)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// エラーレスポンスの場合
+	if resp.StatusCode != http.StatusOK {
+		var apiErr APIError
+		if err := json.Unmarshal(body, &apiErr); err != nil {
+			return nil, handleHTTPError(resp.StatusCode)
+		}
+		return nil, handleAPIError(&apiErr)
+	}
+
+	var result ResponseV2[T]
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return &result.Data, nil
 }
 
 // handleHTTPError はHTTPステータスコードに応じたエラーを返します

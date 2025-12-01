@@ -28,7 +28,9 @@ func formatMatchReasons(reasons []string) string {
 		return ""
 	}
 
+	// v1とv2の両方のマッチ理由に対応
 	reasonMap := map[string]string{
+		// v1 (Spotify Audio Features)
 		"tempo":        "テンポ",
 		"energy":       "エネルギー",
 		"valence":      "明るさ",
@@ -36,12 +38,21 @@ func formatMatchReasons(reasons []string) string {
 		"acousticness": "アコースティック",
 		"same_genre":   "同ジャンル",
 		"same_artist":  "同アーティスト",
+		// v2 (Deezer + MusicBrainz)
+		"similar_bpm":      "BPM類似",
+		"similar_duration": "長さ類似",
+		"similar_gain":     "音圧類似",
+		"artist_relation":  "アーティスト関連",
 	}
 
 	var labels []string
 	for _, r := range reasons {
 		if label, ok := reasonMap[r]; ok {
 			labels = append(labels, label)
+		} else if strings.HasPrefix(r, "same_tag:") {
+			// same_tag:anime → "タグ: anime"
+			tag := strings.TrimPrefix(r, "same_tag:")
+			labels = append(labels, fmt.Sprintf("タグ:%s", tag))
 		} else {
 			labels = append(labels, r)
 		}
@@ -82,10 +93,19 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 		}
 
 		// 基本情報
-		trackInfo := fmt.Sprintf(
-			"**%d. %s** - %s\n📀 %s",
-			start+i+1, track.Name, artistStr, track.Album.Name,
-		)
+		var trackInfo string
+		if track.Album.Name != "" {
+			trackInfo = fmt.Sprintf(
+				"**%d. %s** - %s\n📀 %s",
+				start+i+1, track.Name, artistStr, track.Album.Name,
+			)
+		} else {
+			// v2 APIではアルバム情報が含まれない場合がある
+			trackInfo = fmt.Sprintf(
+				"**%d. %s** - %s",
+				start+i+1, track.Name, artistStr,
+			)
+		}
 
 		// 類似度スコア（あれば）
 		if track.SimilarityScore != nil {
@@ -98,7 +118,15 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 			trackInfo += fmt.Sprintf("\n✨ %s", reasons)
 		}
 
-		trackInfo += fmt.Sprintf("\n🔗 [Spotify](%s)", track.URL)
+		// Spotifyリンク
+		spotifyURL := track.URL
+		if spotifyURL == "" && track.ID != "" {
+			// v2 APIではURLが含まれないので、IDからURLを構築
+			spotifyURL = fmt.Sprintf("https://open.spotify.com/track/%s", track.ID)
+		}
+		if spotifyURL != "" {
+			trackInfo += fmt.Sprintf("\n🔗 [Spotify](%s)", spotifyURL)
+		}
 
 		trackListParts = append(trackListParts, trackInfo)
 	}

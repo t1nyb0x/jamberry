@@ -28,7 +28,7 @@ type RecommendInput struct {
 // RecommendOutput はレコメンド取得の出力結果です
 type RecommendOutput struct {
 	SeedTrack    *domain.Track
-	SeedFeatures *domain.AudioFeatures
+	SeedFeatures *domain.TrackFeatures // v2: Deezer + MusicBrainz features
 	Items        []domain.SimilarTrack
 	Mode         domain.RecommendMode
 }
