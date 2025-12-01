@@ -54,13 +54,13 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 		}
 
 		// 番号と曲名（太字）
-		trackInfo := fmt.Sprintf("**%d. %s**\n", start+i+1, track.Name)
+		trackInfo := fmt.Sprintf("**%d. %s**", start+i+1, track.Name)
 
 		// アーティスト名 | 類似度
 		if track.SimilarityScore != nil {
-			trackInfo += fmt.Sprintf("- %s | 類似度: %.0f%%", artistStr, *track.SimilarityScore*100)
+			trackInfo += fmt.Sprintf("🎤 %s | 類似度: %.0f%%", artistStr, *track.SimilarityScore*100)
 		} else {
-			trackInfo += fmt.Sprintf("- %s", artistStr)
+			trackInfo += fmt.Sprintf("🎤 %s", artistStr)
 		}
 
 		// アルバム名（あれば）
