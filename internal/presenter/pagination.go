@@ -35,7 +35,7 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 	description := fmt.Sprintf("「%s」に基づくレコメンド\n**モード**: %s (%d-%d / %d 件)", originalTrackName, modeLabel, start+1, end, total)
 
 	var trackListParts []string
-	for i, track := range displayItems {
+	for _, track := range displayItems {
 		// アーティスト名を取得
 		var artistStr string
 		if len(track.Artists) > 0 {
@@ -53,8 +53,15 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 			artistStr = strings.Join(artistNames, ", ")
 		}
 
-		// 基本情報（番号、曲名、アーティスト）
-		trackInfo := fmt.Sprintf("**%d. %s**\n- %s", start+i+1, track.Name, artistStr)
+		// 曲名（太字）
+		trackInfo := fmt.Sprintf("**%s**\n", track.Name)
+
+		// アーティスト名 | 類似度
+		if track.SimilarityScore != nil {
+			trackInfo += fmt.Sprintf("- %s | 類似度: %.0f%%", artistStr, *track.SimilarityScore*100)
+		} else {
+			trackInfo += fmt.Sprintf("- %s", artistStr)
+		}
 
 		// アルバム名（あれば）
 		if track.Album.Name != "" {

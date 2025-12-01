@@ -122,6 +122,8 @@ type recommendTrackResponseV2 struct {
 	ID              string                 `json:"id"`
 	Name            string                 `json:"name"`
 	Artists         []artistBasic          `json:"artists"`
+	Album           *albumResponse         `json:"album"`
+	URL             string                 `json:"url"`
 	SimilarityScore float64                `json:"similarity_score"`
 	MatchReasons    []string               `json:"match_reasons"`
 	Features        *trackFeaturesResponse `json:"features"`
@@ -131,12 +133,17 @@ func (t *recommendTrackResponseV2) toDomain() domain.SimilarTrack {
 	track := domain.SimilarTrack{
 		ID:              t.ID,
 		Name:            t.Name,
+		URL:             t.URL,
 		SimilarityScore: &t.SimilarityScore,
 		MatchReasons:    t.MatchReasons,
 	}
 
 	for _, artist := range t.Artists {
 		track.Artists = append(track.Artists, artist.toDomain())
+	}
+
+	if t.Album != nil {
+		track.Album = t.Album.toDomainBasic()
 	}
 
 	if t.Features != nil {
