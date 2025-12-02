@@ -78,6 +78,18 @@ func (h *Handler) handleCommand(s *discordgo.Session, i *discordgo.InteractionCr
 		return
 	}
 
+	// helpコマンドの処理
+	if cmdName == "help" {
+		slog.Info("command received",
+			"guild_id", i.GuildID,
+			"channel_id", i.ChannelID,
+			"command", cmdName,
+			"user_id", userID,
+		)
+		h.handleHelp(s, i)
+		return
+	}
+
 	var subCmdName string
 	var options []*discordgo.ApplicationCommandInteractionDataOption
 
