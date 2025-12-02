@@ -85,8 +85,11 @@ func (c *Client) FetchRecommend(ctx context.Context, spotifyURL string, mode dom
 	if mode == "" {
 		mode = domain.RecommendModeBalanced
 	}
-	if limit <= 0 || limit > 50 {
-		limit = 10
+	if limit <= 0 {
+		limit = 20 // TrackTaste v2 APIのデフォルトは20件
+	}
+	if limit > 50 {
+		limit = 50 // TrackTaste v2 APIの上限は50件
 	}
 
 	// v2 API エンドポイントを使用（レスポンス形式はv1と同じ: status + result）
