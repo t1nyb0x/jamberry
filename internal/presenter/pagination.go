@@ -110,7 +110,7 @@ func BuildSearchEmbed(query string, items []domain.Track, page, pageSize, total 
 	for i, track := range displayItems {
 		artistStr := JoinArtistNames(track.Artists)
 		trackListParts = append(trackListParts, fmt.Sprintf(
-			"**%d. %s** - %s\n📀 %s\n🔗 [Spotify](%s)",
+			"**%d. %s** 🎤 %s\n📀 %s\n🔗 [Spotify](%s)",
 			start+i+1, track.Name, artistStr, track.Album.Name, track.URL,
 		))
 	}
