@@ -64,6 +64,8 @@ type SimilarTrack struct {
 	Album           Album
 	Artists         []Artist
 	SimilarityScore *float64
+	GenreBonus      *float64       // v2: ジャンルボーナス倍率
+	FinalScore      *float64       // v2: 最終スコア (similarity_score * genre_bonus)
 	MatchReasons    []string
 	AudioFeatures   *AudioFeatures // 旧仕様（v1）
 	Features        *TrackFeatures // 新仕様（v2）

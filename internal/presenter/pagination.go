@@ -56,16 +56,23 @@ func BuildRecommendEmbed(originalTrackName string, items []domain.SimilarTrack, 
 		// 番号と曲名（太字）
 		trackInfo := fmt.Sprintf("**%d. %s**", start+i+1, track.Name)
 
-		// アーティスト名 | 類似度
-		if track.SimilarityScore != nil {
-			trackInfo += fmt.Sprintf("🎤 %s | 類似度: %.0f%%", artistStr, *track.SimilarityScore*100)
-		} else {
-			trackInfo += fmt.Sprintf("🎤 %s", artistStr)
-		}
+		// アーティスト名
+		trackInfo += fmt.Sprintf("🎤 %s", artistStr)
 
 		// アルバム名（あれば）
 		if track.Album.Name != "" {
 			trackInfo += fmt.Sprintf("\n📀 %s", track.Album.Name)
+		}
+
+		// スコア表示（final_scoreを優先、なければsimilarity_scoreを使用）
+		if track.FinalScore != nil {
+			if track.GenreBonus != nil && *track.GenreBonus != 1.0 {
+				trackInfo += fmt.Sprintf("\n✨ %.2f (×%.1f)", *track.FinalScore, *track.GenreBonus)
+			} else {
+				trackInfo += fmt.Sprintf("\n✨ %.2f", *track.FinalScore)
+			}
+		} else if track.SimilarityScore != nil {
+			trackInfo += fmt.Sprintf("\n✨ %.0f%%", *track.SimilarityScore*100)
 		}
 
 		// Spotifyリンク
