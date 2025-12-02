@@ -20,7 +20,7 @@ func New(token string) (*Bot, error) {
 		return nil, err
 	}
 
-	session.Identify.Intents = discordgo.IntentsGuilds
+	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages
 
 	return &Bot{
 		session:  session,

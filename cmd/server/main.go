@@ -67,6 +67,9 @@ func main() {
 	// インタラクションハンドラーの登録
 	b.AddHandler(h.HandleInteraction)
 
+	// メンションハンドラーの登録
+	b.AddHandler(h.HandleMessageCreate)
+
 	// Botの起動
 	if err := b.Start(); err != nil {
 		slog.Error("failed to start bot", "error", err)

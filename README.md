@@ -17,6 +17,11 @@ Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡
 | `/jam recommend <spotify_url_or_id> [mode]` | 楽曲に基づくレコメンドを表示（5 件）           |
 | `/jam search <query>`                       | 楽曲を検索（10 件、ページネーション対応）      |
 | `/tracktaste`                               | TrackTaste API のステータスを確認（Ephemeral） |
+| `/help`                                     | ヘルプを表示（Ephemeral）                      |
+
+### メンション機能
+
+Bot にメンションすると、ヘルプコマンドの使い方を案内します。
 
 ### レコメンドモード
 

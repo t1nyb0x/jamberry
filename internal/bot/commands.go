@@ -89,5 +89,9 @@ func Commands() []*discordgo.ApplicationCommand {
 			Name:        "tracktaste",
 			Description: "TrackTaste API のステータスを確認します",
 		},
+		{
+			Name:        "help",
+			Description: "jamberry のヘルプを表示します",
+		},
 	}
 }
