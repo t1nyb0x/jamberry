@@ -169,7 +169,7 @@ func TestNewTrackUseCase(t *testing.T) {
 	uc := NewTrackUseCase(repo)
 
 	if uc == nil {
-		t.Error("NewTrackUseCase returned nil")
+		t.Fatal("NewTrackUseCase returned nil")
 	}
 	if uc.repo != repo {
 		t.Error("repo not set correctly")

@@ -167,7 +167,7 @@ func TestNewArtistUseCase(t *testing.T) {
 	uc := NewArtistUseCase(repo)
 
 	if uc == nil {
-		t.Error("NewArtistUseCase returned nil")
+		t.Fatal("NewArtistUseCase returned nil")
 	}
 	if uc.repo != repo {
 		t.Error("repo not set correctly")

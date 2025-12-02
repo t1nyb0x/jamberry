@@ -185,7 +185,7 @@ func TestNewAlbumUseCase(t *testing.T) {
 	uc := NewAlbumUseCase(repo)
 
 	if uc == nil {
-		t.Error("NewAlbumUseCase returned nil")
+		t.Fatal("NewAlbumUseCase returned nil")
 	}
 	if uc.repo != repo {
 		t.Error("repo not set correctly")

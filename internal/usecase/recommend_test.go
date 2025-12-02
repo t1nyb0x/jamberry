@@ -252,7 +252,7 @@ func TestNewRecommendUseCase(t *testing.T) {
 	uc := NewRecommendUseCase(repo)
 
 	if uc == nil {
-		t.Error("NewRecommendUseCase returned nil")
+		t.Fatal("NewRecommendUseCase returned nil")
 	}
 	if uc.repo != repo {
 		t.Error("repo not set correctly")

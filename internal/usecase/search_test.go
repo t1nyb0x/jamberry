@@ -152,7 +152,7 @@ func TestNewSearchUseCase(t *testing.T) {
 	uc := NewSearchUseCase(repo)
 
 	if uc == nil {
-		t.Error("NewSearchUseCase returned nil")
+		t.Fatal("NewSearchUseCase returned nil")
 	}
 	if uc.repo != repo {
 		t.Error("repo not set correctly")
