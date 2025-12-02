@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/t1nyb0x/jamberry/compare/v1.1.1...v1.2.0) (2025-12-02)
+
+
+### Features
+
+* discordのplaying部分を調整 ([00bea63](https://github.com/t1nyb0x/jamberry/commit/00bea6373182da0db0de2f196e52065da510463b))
+* tracktaste 2.0.1対応 ([e4c6a95](https://github.com/t1nyb0x/jamberry/commit/e4c6a950801b47c7f4243a92e3e88bb70bf77368))
+
 ## [1.1.1](https://github.com/t1nyb0x/jamberry/compare/v1.1.0...v1.1.1) (2025-12-01)
 
 
