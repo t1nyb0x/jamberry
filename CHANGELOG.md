@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/t1nyb0x/jamberry/compare/v1.3.0...v1.4.0) (2025-12-02)
+
+
+### Features
+
+* helpコマンド追加 ([19fdd91](https://github.com/t1nyb0x/jamberry/commit/19fdd91eef6e84a5900b260562f07410e9e25f92))
+* メンションがあった際にhelpコマンドを案内するメッセージを送信する機能を追加 ([cf83ba5](https://github.com/t1nyb0x/jamberry/commit/cf83ba5d70c92f583b2ac8d34aab8d4a8ee5d0cc))
+
 ## [1.3.0](https://github.com/t1nyb0x/jamberry/compare/v1.2.0...v1.3.0) (2025-12-02)
 
 
