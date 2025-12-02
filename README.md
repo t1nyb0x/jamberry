@@ -9,13 +9,14 @@ Spotify の楽曲・アーティスト・アルバム情報を Discord 上で簡
 
 ### スラッシュコマンド
 
-| コマンド                                    | 説明                                      |
-| ------------------------------------------- | ----------------------------------------- |
-| `/jam track <spotify_url_or_id>`            | 楽曲情報を表示（KKBOX リンク付き）        |
-| `/jam artist <spotify_url_or_id>`           | アーティスト情報を表示                    |
-| `/jam album <spotify_url_or_id>`            | アルバム情報を表示                        |
-| `/jam recommend <spotify_url_or_id> [mode]` | 楽曲に基づくレコメンドを表示（5 件）      |
-| `/jam search <query>`                       | 楽曲を検索（10 件、ページネーション対応） |
+| コマンド                                    | 説明                                           |
+| ------------------------------------------- | ---------------------------------------------- |
+| `/jam track <spotify_url_or_id>`            | 楽曲情報を表示（KKBOX リンク付き）             |
+| `/jam artist <spotify_url_or_id>`           | アーティスト情報を表示                         |
+| `/jam album <spotify_url_or_id>`            | アルバム情報を表示                             |
+| `/jam recommend <spotify_url_or_id> [mode]` | 楽曲に基づくレコメンドを表示（5 件）           |
+| `/jam search <query>`                       | 楽曲を検索（10 件、ページネーション対応）      |
+| `/tracktaste`                               | TrackTaste API のステータスを確認（Ephemeral） |
 
 ### レコメンドモード
 
