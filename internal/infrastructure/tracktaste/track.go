@@ -93,10 +93,11 @@ func (f *trackFeaturesResponse) toDomain() *domain.TrackFeatures {
 
 // seedTrackResponseV2 はシードトラック情報を表します（v2）
 type seedTrackResponseV2 struct {
-	ID      string         `json:"id"`
-	Name    string         `json:"name"`
-	Artists []artistBasic  `json:"artists"` // 実際のAPIは複数形
-	Album   *albumResponse `json:"album"`
+	ID            string                 `json:"id"`
+	Name          string                 `json:"name"`
+	Artists       []artistBasic          `json:"artists"` // 実際のAPIは複数形
+	Album         *albumResponse         `json:"album"`
+	AudioFeatures *trackFeaturesResponse `json:"audio_features"` // v2: シードトラックの特徴量
 }
 
 func (s *seedTrackResponseV2) toDomain() domain.Track {
@@ -125,8 +126,11 @@ type recommendTrackResponseV2 struct {
 	Album           *albumResponse         `json:"album"`
 	URL             string                 `json:"url"`
 	SimilarityScore float64                `json:"similarity_score"`
+	GenreBonus      *float64               `json:"genre_bonus"`  // v2: ジャンルボーナス倍率
+	FinalScore      *float64               `json:"final_score"` // v2: 最終スコア
 	MatchReasons    []string               `json:"match_reasons"`
-	Features        *trackFeaturesResponse `json:"features"`
+	AudioFeatures   *trackFeaturesResponse `json:"audio_features"` // v2: seed_trackと同形式
+	Features        *trackFeaturesResponse `json:"features"`       // v2: 旧形式（互換性のため維持）
 }
 
 func (t *recommendTrackResponseV2) toDomain() domain.SimilarTrack {
@@ -135,6 +139,8 @@ func (t *recommendTrackResponseV2) toDomain() domain.SimilarTrack {
 		Name:            t.Name,
 		URL:             t.URL,
 		SimilarityScore: &t.SimilarityScore,
+		GenreBonus:      t.GenreBonus,
+		FinalScore:      t.FinalScore,
 		MatchReasons:    t.MatchReasons,
 	}
 
@@ -146,7 +152,10 @@ func (t *recommendTrackResponseV2) toDomain() domain.SimilarTrack {
 		track.Album = t.Album.toDomainBasic()
 	}
 
-	if t.Features != nil {
+	// audio_featuresまたはfeaturesから変換（audio_featuresを優先）
+	if t.AudioFeatures != nil {
+		track.Features = t.AudioFeatures.toDomain()
+	} else if t.Features != nil {
 		track.Features = t.Features.toDomain()
 	}
 
@@ -173,7 +182,10 @@ func (r *recommendResponseV2) toDomain() *domain.RecommendResult {
 		Mode:      domain.RecommendMode(r.Mode),
 	}
 
-	if r.SeedFeatures != nil {
+	// SeedFeatures: seed_track.audio_features を優先、なければ seed_features を使用
+	if r.SeedTrack.AudioFeatures != nil {
+		result.SeedFeatures = r.SeedTrack.AudioFeatures.toDomain()
+	} else if r.SeedFeatures != nil {
 		result.SeedFeatures = r.SeedFeatures.toDomain()
 	}
 
