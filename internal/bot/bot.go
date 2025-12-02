@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/bwmarrin/discordgo"
@@ -10,9 +9,8 @@ import (
 
 // Bot はDiscord Botを表します
 type Bot struct {
-	session           *discordgo.Session
-	commands          []*discordgo.ApplicationCommand
-	trackTasteVersion string
+	session  *discordgo.Session
+	commands []*discordgo.ApplicationCommand
 }
 
 // New は新しいBotを作成します
@@ -44,7 +42,7 @@ func (b *Bot) Start() error {
 	slog.Info("connected to discord")
 
 	// ステータスにバージョン情報を表示
-	status := b.buildStatusString()
+	status := "v" + version.GetVersion()
 	if err := b.session.UpdateGameStatus(0, status); err != nil {
 		slog.Warn("failed to update status", "error", err)
 	} else {
@@ -72,18 +70,4 @@ func (b *Bot) Stop() error {
 // AddHandler はイベントハンドラーを追加します
 func (b *Bot) AddHandler(handler interface{}) {
 	b.session.AddHandler(handler)
-}
-
-// SetTrackTasteVersion はTrackTasteのバージョンを設定します
-func (b *Bot) SetTrackTasteVersion(version string) {
-	b.trackTasteVersion = version
-}
-
-// buildStatusString はDiscordに表示するステータス文字列を生成します
-func (b *Bot) buildStatusString() string {
-	jamberryVersion := "v" + version.GetVersion()
-	if b.trackTasteVersion != "" {
-		return fmt.Sprintf("%s | TrackTaste %s", jamberryVersion, b.trackTasteVersion)
-	}
-	return jamberryVersion
 }

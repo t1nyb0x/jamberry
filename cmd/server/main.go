@@ -45,17 +45,6 @@ func main() {
 
 	limiter := ratelimit.NewLimiter()
 
-	// TrackTasteのバージョン情報を取得
-	healthCtx, healthCancel := context.WithTimeout(context.Background(), 5*time.Second)
-	health, err := ttClient.FetchHealth(healthCtx)
-	healthCancel()
-	if err != nil {
-		slog.Warn("failed to fetch TrackTaste version", "error", err)
-	} else {
-		b.SetTrackTasteVersion(health.Version)
-		slog.Info("fetched TrackTaste version", "version", health.Version)
-	}
-
 	// ユースケース層の作成
 	trackUC := usecase.NewTrackUseCase(ttClient)
 	artistUC := usecase.NewArtistUseCase(ttClient)
@@ -72,6 +61,7 @@ func main() {
 		searchUC,
 		cacheManager,
 		limiter,
+		ttClient,
 	)
 
 	// インタラクションハンドラーの登録

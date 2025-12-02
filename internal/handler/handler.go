@@ -6,6 +6,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/t1nyb0x/jamberry/internal/domain"
+	"github.com/t1nyb0x/jamberry/internal/infrastructure/tracktaste"
 	"github.com/t1nyb0x/jamberry/internal/ratelimit"
 	"github.com/t1nyb0x/jamberry/internal/usecase"
 )
@@ -20,6 +21,7 @@ type Handler struct {
 	cache            domain.CacheRepository
 	limiter          *ratelimit.Limiter
 	responder        *Responder
+	ttClient         *tracktaste.Client
 }
 
 // NewHandler は新しいハンドラーを作成します
@@ -31,6 +33,7 @@ func NewHandler(
 	searchUC *usecase.SearchUseCase,
 	cache domain.CacheRepository,
 	limiter *ratelimit.Limiter,
+	ttClient *tracktaste.Client,
 ) *Handler {
 	return &Handler{
 		trackUseCase:     trackUC,
@@ -41,6 +44,7 @@ func NewHandler(
 		cache:            cache,
 		limiter:          limiter,
 		responder:        NewResponder(),
+		ttClient:         ttClient,
 	}
 }
 
@@ -61,6 +65,18 @@ func (h *Handler) handleCommand(s *discordgo.Session, i *discordgo.InteractionCr
 	// サブコマンド名を取得
 	cmdData := i.ApplicationCommandData()
 	cmdName := cmdData.Name
+
+	// tracktasteコマンドの処理
+	if cmdName == "tracktaste" {
+		slog.Info("command received",
+			"guild_id", i.GuildID,
+			"channel_id", i.ChannelID,
+			"command", cmdName,
+			"user_id", userID,
+		)
+		h.handleTrackTaste(s, i)
+		return
+	}
 
 	var subCmdName string
 	var options []*discordgo.ApplicationCommandInteractionDataOption
