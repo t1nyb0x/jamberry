@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/t1nyb0x/jamberry/compare/v1.2.0...v1.3.0) (2025-12-02)
+
+
+### Features
+
+* ヘルスチェックコマンド追加 ([f713a68](https://github.com/t1nyb0x/jamberry/commit/f713a68e88f3231ce6a9ac3dc6927a2a914fcc44))
+
 ## [1.2.0](https://github.com/t1nyb0x/jamberry/compare/v1.1.1...v1.2.0) (2025-12-02)
 
 
